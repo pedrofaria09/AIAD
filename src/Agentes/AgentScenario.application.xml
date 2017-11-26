@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- <H3> The PingPong Scenario </H3> Starts Ping agent, and sends a Ping 
-	message to Pong Agent. Pong agent will reply with pong to Ping Agent. -->
+<!-- <H3> TradeHero </H3> Agents follow other agents to get most profit on market exchange -->
 <applicationtype xmlns="http://jadex.sourceforge.net/jadex"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://jadex.sourceforge.net/jadex
 http://jadex.sourceforge.net/jadexapplication-2.2.xsd"
-	name="AgentScenario">
+	name="AgentScenario" package="Agentes">
 	<componenttypes>
-		<componenttype name="Bolsa" filename="bin/BolsaAgent.class"
+		<componenttype name="Bolsa" filename="bin/agentes/BolsaAgent.class"
 			master="true" />
-		<componenttype name="Investidor" filename="bin/InvestidorAgent.class"
+		<componenttype name="Investidor" filename="bin/agentes/InvestidorAgent.class"
 			master="true" />
 	</componenttypes>
 	<configurations>
-		<configuration name="Ping-Pong">
+		<configuration name="Initial-Test">
 			<components>
 				<component type="Bolsa" name="Bolsa" />
 				<component type="Investidor" name="Investidor" />

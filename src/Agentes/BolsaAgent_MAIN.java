@@ -1,3 +1,7 @@
+package Agentes;
+import App.Acao;
+import App.Bolsa;
+import App.Cotacao;
 
 public class BolsaAgent_MAIN {
 
@@ -18,11 +22,11 @@ public class BolsaAgent_MAIN {
 		agent.addListAcoesCompradas(acao);
 
 		System.out.println(agent.getListAcoesCompradas().size());
-
+		
 
 		while(true) {
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(2000);
 
 				bolsa.updateBolsa();
 
