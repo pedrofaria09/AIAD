@@ -1,32 +1,33 @@
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Bolsa {
 	private String nome;
-	private double cotacao;
-	private Date date;
+	private List<Cotacao> ListVariacaoCotacao = new ArrayList<Cotacao>();
 
-	public Bolsa(String nome, double cotacao) {
+	public Bolsa(String nome, Cotacao cotacao) {
 		this.nome = nome;
-		this.cotacao = cotacao;
-		this.date = new Date();
+		this.ListVariacaoCotacao.add(cotacao);
 	}
 
 	public String getNome() {
 		return this.nome;
 	}
-
-	public Double getCotacao() {
-		return this.cotacao;
+	
+	public List<Cotacao> getListVariacaoCotacao() {
+		return this.ListVariacaoCotacao;
 	}
 
-	public String getData() {
-		SimpleDateFormat ft = new SimpleDateFormat ("H:m:s d/M/y");
-		return ft.format(this.date);
+	public void addListVariacaoCotacao(Cotacao cotacao) {
+		this.ListVariacaoCotacao.add(cotacao);
 	}
 
 	public void imprime() {
-		SimpleDateFormat ft = new SimpleDateFormat ("H:m:s d/M/y");
-		System.out.println("Nome:"+this.nome+" Valor:"+this.cotacao+ " Data:" + ft.format(this.date));
+		SimpleDateFormat ft = new SimpleDateFormat ("H:mm:ss d/M/y");
+		System.out.println("Nome:"+this.nome);
+		for(Cotacao cot : this.ListVariacaoCotacao) {
+			System.out.println(" Cotacao: "+cot.getCotacao() + " Data: " + ft.format(cot.getData()));
+		}
 	}
 }
