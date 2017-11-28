@@ -15,7 +15,7 @@ public class Bolsa {
 	public String getNome() {
 		return this.nome;
 	}
-	
+
 	public List<Cotacao> getListVariacaoCotacao() {
 		return this.ListVariacaoCotacao;
 	}

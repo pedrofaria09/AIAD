@@ -1,14 +1,18 @@
 package App;
 
+import java.text.SimpleDateFormat;
+
 public class Acao {
 	private String NomeAgente;
 	private String NomeBolsa;
 	private Cotacao cotacao;
+	private double valor;
 
-	public Acao(String nomeAgente, String nomeBolsa, Cotacao cotacao) {
+	public Acao(String nomeAgente, String nomeBolsa, Cotacao cotacao, double valorDeCompra) {
 		this.NomeAgente = nomeAgente;
 		this.NomeBolsa = nomeBolsa;
 		this.cotacao = cotacao;
+		this.valor = valorDeCompra;
 	}
 
 	public String getNomeAgente() {
@@ -33,6 +37,15 @@ public class Acao {
 
 	public void setCotacao(Cotacao cotacao) {
 		this.cotacao = cotacao;
+	}
+
+	public double getValorDeCompra() {
+		return valor;
+	}
+
+	public void imprime() {
+		System.out.print("Nome Agente: "+this.NomeAgente + " - Nome Bolsa: " + this.NomeBolsa + " - Valor: "+this.valor);
+		this.cotacao.imprime();
 	}
 
 }
