@@ -80,19 +80,22 @@ public class BolsaAgent extends MicroAgent implements BolsaService {
 		int FlagUpdate;
 		Cotacao cot;
 		double newCot;
-
+		
+		
 		for(Bolsa bol: this.ListaBolsa) {
-			FlagUpdate = ThreadLocalRandom.current().nextInt(0, 4);
+			FlagUpdate = ThreadLocalRandom.current().nextInt(0, 6);
 			cot = bol.getListVariacaoCotacao().get(bol.getListVariacaoCotacao().size()-1);
 
-			if(FlagUpdate == 1 || FlagUpdate == 2) {
-				newCot = (cot.getCotacao() + 0.1);
-			}else if(FlagUpdate == 3){
-				newCot = (cot.getCotacao() - 0.1);
+			if(FlagUpdate == 0 || FlagUpdate == 1 || FlagUpdate == 5) {
+				double auxCotacao = ThreadLocalRandom.current().nextDouble(0.01,0.06);
+				newCot = (cot.getCotacao() + cot.getCotacao()*auxCotacao);
+			}else if(FlagUpdate == 2 || FlagUpdate == 3){
+				double auxCotacao = ThreadLocalRandom.current().nextDouble(0.01,0.06);
+				newCot = (cot.getCotacao() - cot.getCotacao()*auxCotacao);
 				if(newCot < 0)
 					newCot = 0;
 			}else {
-				newCot =cot.getCotacao();
+				newCot = cot.getCotacao();
 			}
 
 			newCot = Auxiliar.round(newCot,2);
