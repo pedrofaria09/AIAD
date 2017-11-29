@@ -13,7 +13,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import App.Acao;
 import App.Bolsa;
 import App.Cotacao;
-import Aux.Auxiliar;
+import Auxiliar.Auxiliar;
 
 @Agent
 @Service
