@@ -23,9 +23,14 @@ public class InvestidorAgent extends MicroAgent{
 	private List<InvestidorAgent> ListASeguir = new ArrayList<InvestidorAgent>();
 	private double cash = 100000;
 	private String nome;
+
 	
 	public InvestidorAgent(String nome) {
 		this.nome = nome;
+	}
+	
+	public InvestidorAgent() {
+		
 	}
 
 	public void addListAcoesCompradas(Acao acao) {

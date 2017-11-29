@@ -6,9 +6,9 @@
 http://jadex.sourceforge.net/jadexapplication-2.2.xsd"
 	name="AgentScenario" package="Agentes">
 	<componenttypes>
-		<componenttype name="Bolsa" filename="bin/agentes/BolsaAgent.class"
+		<componenttype name="Bolsa" filename="bin/Agentes/BolsaAgent.class"
 			master="true" />
-		<componenttype name="Investidor" filename="bin/agentes/InvestidorAgent.class"
+		<componenttype name="Investidor" filename="bin/Agentes/InvestidorAgent.class"
 			master="true" />
 	</componenttypes>
 	<configurations>
