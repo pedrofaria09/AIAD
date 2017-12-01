@@ -1,22 +1,17 @@
 package Agentes;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import App.Acao;
-import App.Cotacao;
-import jadex.bdiv3.BDIAgent;
+import jadex.bridge.IInternalAccess;
 import jadex.bridge.service.RequiredServiceInfo;
 import jadex.bridge.service.search.SServiceProvider;
-import jadex.commons.future.DefaultResultListener;
-import jadex.commons.future.Future;
-import jadex.commons.future.IFuture;
-import jadex.micro.MicroAgent;
-import jadex.micro.annotation.Agent;
-import jadex.micro.annotation.AgentBody;
-import jadex.micro.annotation.ProvidedServices;
-import jadex.micro.annotation.ProvidedService;
+import jadex.micro.annotation.*;
 
+@RequiredServices({
+		@RequiredService(name="sum", type=IBolsaService.class,
+				binding=@Binding(scope= RequiredServiceInfo.SCOPE_GLOBAL))
+})
 @Agent
 public class InvestidorAgentBDI{
 	private List<Acao> ListAcoesCompradas = new ArrayList<Acao>();
@@ -26,8 +21,8 @@ public class InvestidorAgentBDI{
 	private double cash = 100000;
 	private String nome;
 	
-	@Agent
-	protected BDIAgent agent;
+	@AgentFeature
+	protected IInternalAccess agent;
 	
 	public InvestidorAgentBDI(String nome) {
 		this.nome = nome;
@@ -114,9 +109,11 @@ public class InvestidorAgentBDI{
 		
 	}
 
+	@AgentService
+	private IBolsaService bolsa;
+
 	@AgentBody
 	public void body() {
-		BolsaService bolsa = SServiceProvider.getService(agent.getServiceProvider(), BolsaService.class, RequiredServiceInfo.SCOPE_PLATFORM).get();
 		System.out.println("Vou pedir valores da bolsa" + agent.getComponentIdentifier().getLocalName());
 		bolsa.getValoresBolsa();
 

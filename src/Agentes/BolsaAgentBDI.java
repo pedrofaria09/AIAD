@@ -3,17 +3,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jadex.bdiv3.annotation.Belief;
-import jadex.bdiv3.BDIAgent;
+import jadex.bdiv3.features.IBDIAgentFeature;
+import jadex.micro.annotation.*;
 import jadex.bdiv3.annotation.Plan;
-import jadex.bdiv3.annotation.PlanBody;
-import jadex.bdiv3.annotation.Plans;
-import jadex.bdiv3.annotation.Trigger;
 import jadex.bdiv3.runtime.IPlan;
 import jadex.micro.annotation.Agent;
-import jadex.micro.annotation.AgentBody;
-import jadex.micro.annotation.Description;
-import jadex.micro.annotation.ProvidedServices;
-import jadex.micro.annotation.ProvidedService;
 
 import jadex.bridge.service.annotation.Service;
 import jadex.commons.future.Future;
@@ -27,13 +21,15 @@ import Auxiliar.Auxiliar;
 
 @Agent
 @Service
-@ProvidedServices(@ProvidedService(type=BolsaService.class))
-public class BolsaAgentBDI implements BolsaService {
+@ProvidedServices({
+		@ProvidedService(name="sum", type=IBolsaService.class, implementation=@Implementation(BolsaAgentBDI.class))
+})
+public class BolsaAgentBDI {
 	private final int TIMEBOLSA = 5000;
-	
-	@Agent
-	protected BDIAgent agent;
-	
+
+	@AgentFeature
+	protected IBDIAgentFeature agent;
+
 	@AgentBody
 	public void body() {
 		agent.adoptPlan("goToUpdateBolsa");
@@ -49,9 +45,8 @@ public class BolsaAgentBDI implements BolsaService {
 		}
 		
 	}
-	
-	@Belief
-	private List<Bolsa> ListaBolsa = new ArrayList<Bolsa>();
+	private List<Bolsa> ListaBolsa;
+
 	@Belief
 	private List<Acao> ListaAcoesCompradas = new ArrayList<Acao>();
 	@Belief
@@ -62,11 +57,12 @@ public class BolsaAgentBDI implements BolsaService {
 	private List<InvestidorAgentBDI> ListaInvestidores = new ArrayList<InvestidorAgentBDI>();
 
 	// Construtor de BolsaAgent
-	public BolsaAgentBDI() {
+	@AgentCreated
+	public void init() {
+		ListaBolsa = new ArrayList<Bolsa>();
 		this.ListaBolsa = loadBolsa();
 	}
 
-	
 	// Getters and adds
 	public List<Bolsa> getBolsa(){
 		return this.ListaBolsa;
