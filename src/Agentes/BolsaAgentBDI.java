@@ -1,13 +1,23 @@
 package Agentes;
 import java.util.ArrayList;
 import java.util.List;
+
+import jadex.bdiv3.annotation.Belief;
+import jadex.bdiv3.BDIAgent;
+import jadex.bdiv3.annotation.Plan;
+import jadex.bdiv3.annotation.PlanBody;
+import jadex.bdiv3.annotation.Plans;
+import jadex.bdiv3.annotation.Trigger;
+import jadex.bdiv3.runtime.IPlan;
+import jadex.micro.annotation.Agent;
+import jadex.micro.annotation.AgentBody;
+import jadex.micro.annotation.Description;
+import jadex.micro.annotation.ProvidedServices;
+import jadex.micro.annotation.ProvidedService;
+
 import jadex.bridge.service.annotation.Service;
 import jadex.commons.future.Future;
 import jadex.commons.future.IFuture;
-import jadex.micro.MicroAgent;
-import jadex.micro.annotation.Agent;
-import jadex.micro.annotation.ProvidedServices;
-import jadex.micro.annotation.ProvidedService;
 import java.util.concurrent.ThreadLocalRandom;
 
 import App.Acao;
@@ -18,18 +28,29 @@ import Auxiliar.Auxiliar;
 @Agent
 @Service
 @ProvidedServices(@ProvidedService(type=BolsaService.class))
-public class BolsaAgent extends MicroAgent implements BolsaService {
+@Plans(@Plan(body=@Body(SleepingPlan.class)))
+public class BolsaAgentBDI implements BolsaService {
+	
+	@Agent
+	protected BolsaAgentBDI agent;
+	
+	@Belief
 	private List<Bolsa> ListaBolsa = new ArrayList<Bolsa>();
+	@Belief
 	private List<Acao> ListaAcoesCompradas = new ArrayList<Acao>();
+	@Belief
 	private List<Acao> ListaAcoesVendidas = new ArrayList<Acao>();
+	@Belief
 	private List<Acao> ListaAcoesAtuais = new ArrayList<Acao>();
+	@Belief
 	private List<InvestidorAgent> ListaInvestidores = new ArrayList<InvestidorAgent>();
 
 	// Construtor de BolsaAgent
-	public BolsaAgent() {
+	public BolsaAgentBDI() {
 		this.ListaBolsa = loadBolsa();
 	}
 
+	
 	// Getters and adds
 	public List<Bolsa> getBolsa(){
 		return this.ListaBolsa;
@@ -67,7 +88,18 @@ public class BolsaAgent extends MicroAgent implements BolsaService {
 		this.ListaInvestidores.add(agente);
 	}
 
-
+	@AgentBody
+	public void body() {
+		agent.adoptPlan("methodPlan");
+	}
+	
+	@Plan
+	public void methodPlan(IPlan plan) {
+		System.out.println("Executing a method plan.");
+		plan.waitFor(5000).get();
+		System.out.println("Method plan done waiting");
+	}
+	
 	public IFuture<Void> getValoresBolsa() {
 		for(Bolsa bol: this.ListaBolsa) {
 			bol.imprime();

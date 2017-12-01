@@ -6,7 +6,7 @@ import App.Cotacao;
 public class BolsaAgent_MAIN {
 
 	public static void main(String[] args) {
-		BolsaAgent bolsa = new BolsaAgent();
+		BolsaAgentBDI bolsa = new BolsaAgentBDI();
 		InvestidorAgent agent = new InvestidorAgent("TESTEAGENT");
 		agent.imprime();
 		
