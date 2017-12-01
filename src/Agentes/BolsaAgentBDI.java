@@ -28,11 +28,27 @@ import Auxiliar.Auxiliar;
 @Agent
 @Service
 @ProvidedServices(@ProvidedService(type=BolsaService.class))
-@Plans(@Plan(body=@Body(SleepingPlan.class)))
 public class BolsaAgentBDI implements BolsaService {
+	private final int TIMEBOLSA = 5000;
 	
 	@Agent
-	protected BolsaAgentBDI agent;
+	protected BDIAgent agent;
+	
+	@AgentBody
+	public void body() {
+		agent.adoptPlan("goToUpdateBolsa");
+	}
+	
+	@Plan
+	public void goToUpdateBolsa(IPlan plan) {
+		while(true) {
+			System.out.println("Vou atualizar a bolsa");
+			updateBolsa();
+			plan.waitFor(TIMEBOLSA).get();
+			System.out.println("Bolsa Atualizada");
+		}
+		
+	}
 	
 	@Belief
 	private List<Bolsa> ListaBolsa = new ArrayList<Bolsa>();
@@ -43,7 +59,7 @@ public class BolsaAgentBDI implements BolsaService {
 	@Belief
 	private List<Acao> ListaAcoesAtuais = new ArrayList<Acao>();
 	@Belief
-	private List<InvestidorAgent> ListaInvestidores = new ArrayList<InvestidorAgent>();
+	private List<InvestidorAgentBDI> ListaInvestidores = new ArrayList<InvestidorAgentBDI>();
 
 	// Construtor de BolsaAgent
 	public BolsaAgentBDI() {
@@ -80,25 +96,15 @@ public class BolsaAgentBDI implements BolsaService {
 		this.ListaAcoesAtuais.add(acao);
 	}
 
-	public List<InvestidorAgent> getListaInvestidores() {
+	public List<InvestidorAgentBDI> getListaInvestidores() {
 		return this.ListaInvestidores;
 	}
 
-	public void addListaInvestidores(InvestidorAgent agente) {
+	public void addListaInvestidores(InvestidorAgentBDI agente) {
 		this.ListaInvestidores.add(agente);
 	}
 
-	@AgentBody
-	public void body() {
-		agent.adoptPlan("methodPlan");
-	}
-	
-	@Plan
-	public void methodPlan(IPlan plan) {
-		System.out.println("Executing a method plan.");
-		plan.waitFor(5000).get();
-		System.out.println("Method plan done waiting");
-	}
+
 	
 	public IFuture<Void> getValoresBolsa() {
 		for(Bolsa bol: this.ListaBolsa) {
@@ -136,7 +142,7 @@ public class BolsaAgentBDI implements BolsaService {
 		}
 	}
 
-	public void comprarAcao(InvestidorAgent agent, String nomeAcao, double valorDeCompra) {
+	public void comprarAcao(InvestidorAgentBDI agent, String nomeAcao, double valorDeCompra) {
 		Bolsa bolsa = null;
 		Acao acao = null;
 		Cotacao lastCotacao = null;
@@ -157,7 +163,7 @@ public class BolsaAgentBDI implements BolsaService {
 		}
 	}
 	
-	public void venderAcao(InvestidorAgent agent, String nomeAcao) {
+	public void venderAcao(InvestidorAgentBDI agent, String nomeAcao) {
 		Acao acaoAretirar = null, acaoAtual = null;
 		Bolsa bolsa = null;
 		Cotacao lastCotacao = null;
@@ -186,6 +192,12 @@ public class BolsaAgentBDI implements BolsaService {
 			System.out.println("Bolsa a vender não foi encontrada");
 		}
 		
+	}
+	
+	public void imprimeBolsa() {
+		for(Bolsa bol: this.ListaBolsa) {
+			bol.imprime();
+		}
 	}
 
 	public List<Bolsa> loadBolsa() {

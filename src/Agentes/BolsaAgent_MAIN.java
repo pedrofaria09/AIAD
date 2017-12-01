@@ -7,7 +7,7 @@ public class BolsaAgent_MAIN {
 
 	public static void main(String[] args) {
 		BolsaAgentBDI bolsa = new BolsaAgentBDI();
-		InvestidorAgent agent = new InvestidorAgent("TESTEAGENT");
+		InvestidorAgentBDI agent = new InvestidorAgentBDI("TESTEAGENT");
 		agent.imprime();
 		
 		for(int i = 0; i < 4; i++) {

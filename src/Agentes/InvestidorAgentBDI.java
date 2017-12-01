@@ -14,22 +14,26 @@ import jadex.commons.future.IFuture;
 import jadex.micro.MicroAgent;
 import jadex.micro.annotation.Agent;
 import jadex.micro.annotation.AgentBody;
+import jadex.micro.annotation.ProvidedServices;
+import jadex.micro.annotation.ProvidedService;
 
 @Agent
-public class InvestidorAgent extends MicroAgent{
+public class InvestidorAgentBDI{
 	private List<Acao> ListAcoesCompradas = new ArrayList<Acao>();
 	private List<Acao> ListAcoesAtuais = new ArrayList<Acao>();
 	private List<Acao> ListAcoesVendidas = new ArrayList<Acao>();
-	private List<InvestidorAgent> ListASeguir = new ArrayList<InvestidorAgent>();
+	private List<InvestidorAgentBDI> ListASeguir = new ArrayList<InvestidorAgentBDI>();
 	private double cash = 100000;
 	private String nome;
-
 	
-	public InvestidorAgent(String nome) {
+	@Agent
+	protected BDIAgent agent;
+	
+	public InvestidorAgentBDI(String nome) {
 		this.nome = nome;
 	}
 	
-	public InvestidorAgent() {
+	public InvestidorAgentBDI() {
 		
 	}
 
@@ -50,11 +54,11 @@ public class InvestidorAgent extends MicroAgent{
 		this.ListAcoesVendidas.add(acao);
 	}
 
-	public List<InvestidorAgent> getListASeguir() {
+	public List<InvestidorAgentBDI> getListASeguir() {
 		return this.ListASeguir;
 	}
 
-	public void addListASeguir(InvestidorAgent agent) {
+	public void addListASeguir(InvestidorAgentBDI agent) {
 		this.ListASeguir.add(agent);
 	}
 	
@@ -103,7 +107,7 @@ public class InvestidorAgent extends MicroAgent{
 		
 		System.out.println("Seguidores: " + this.ListASeguir.size());
 		if(this.ListASeguir.size() > 0) {
-			for(InvestidorAgent ag : this.ListASeguir) {
+			for(InvestidorAgentBDI ag : this.ListASeguir) {
 				System.out.println("\t " + ag.getNome());
 			}
 		}
@@ -111,11 +115,10 @@ public class InvestidorAgent extends MicroAgent{
 	}
 
 	@AgentBody
-	public IFuture<Void> executeBody() {
-		BolsaService bolsa = SServiceProvider.getService(this.getServiceProvider(), BolsaService.class, RequiredServiceInfo.SCOPE_PLATFORM).get();
-		System.out.println(this.getComponentIdentifier().getLocalName());
+	public void body() {
+		BolsaService bolsa = SServiceProvider.getService(agent.getServiceProvider(), BolsaService.class, RequiredServiceInfo.SCOPE_PLATFORM).get();
+		System.out.println("Vou pedir valores da bolsa" + agent.getComponentIdentifier().getLocalName());
 		bolsa.getValoresBolsa();
 
-		return new Future<>();
 	}
 }

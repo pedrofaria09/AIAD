@@ -8,7 +8,7 @@ http://jadex.sourceforge.net/jadexapplication-2.2.xsd"
 	<componenttypes>
 		<componenttype name="Bolsa" filename="bin/Agentes/BolsaAgentBDI.class"
 			master="true" />
-		<componenttype name="Investidor" filename="bin/Agentes/InvestidorAgent.class"
+		<componenttype name="Investidor" filename="bin/Agentes/InvestidorAgentBDI.class"
 			master="true" />
 	</componenttypes>
 	<configurations>
