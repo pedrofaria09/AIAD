@@ -9,12 +9,11 @@ import jadex.bdiv3.annotation.PlanBody;
 import jadex.bdiv3.annotation.Plans;
 import jadex.bdiv3.annotation.Trigger;
 import jadex.bdiv3.runtime.IPlan;
-import jadex.micro.annotation.Agent;
 import jadex.micro.annotation.AgentBody;
 import jadex.micro.annotation.Description;
+import jadex.micro.annotation.Agent;
 import jadex.micro.annotation.ProvidedServices;
 import jadex.micro.annotation.ProvidedService;
-
 import jadex.bridge.service.annotation.Service;
 import jadex.commons.future.Future;
 import jadex.commons.future.IFuture;
@@ -29,44 +28,42 @@ import Auxiliar.Auxiliar;
 @Service
 @ProvidedServices(@ProvidedService(type=BolsaService.class))
 public class BolsaAgentBDI implements BolsaService {
-	private final int TIMEBOLSA = 5000;
-	
+	private List<Bolsa> ListaBolsa = new ArrayList<Bolsa>();
+	private final int TIMEBOLSA = 2000;
+
+	public BolsaAgentBDI() {
+		System.out.println("Criou o Agente Bolsa");
+		this.ListaBolsa = loadBolsa();
+	}
+
 	@Agent
 	protected BDIAgent agent;
-	
+
 	@AgentBody
 	public void body() {
 		agent.adoptPlan("goToUpdateBolsa");
 	}
-	
+
 	@Plan
 	public void goToUpdateBolsa(IPlan plan) {
 		while(true) {
-			System.out.println("Vou atualizar a bolsa");
 			updateBolsa();
 			plan.waitFor(TIMEBOLSA).get();
 			System.out.println("Bolsa Atualizada");
 		}
-		
 	}
-	
-	@Belief
+	/*
+	//@Belief
 	private List<Bolsa> ListaBolsa = new ArrayList<Bolsa>();
-	@Belief
+	//@Belief
 	private List<Acao> ListaAcoesCompradas = new ArrayList<Acao>();
-	@Belief
+	//@Belief
 	private List<Acao> ListaAcoesVendidas = new ArrayList<Acao>();
-	@Belief
+	//@Belief
 	private List<Acao> ListaAcoesAtuais = new ArrayList<Acao>();
-	@Belief
-	private List<InvestidorAgentBDI> ListaInvestidores = new ArrayList<InvestidorAgentBDI>();
+	//@Belief
+	private List<InvestidorBDI> ListaInvestidores = new ArrayList<InvestidorBDI>();
 
-	// Construtor de BolsaAgent
-	public BolsaAgentBDI() {
-		this.ListaBolsa = loadBolsa();
-	}
-
-	
 	// Getters and adds
 	public List<Bolsa> getBolsa(){
 		return this.ListaBolsa;
@@ -96,30 +93,27 @@ public class BolsaAgentBDI implements BolsaService {
 		this.ListaAcoesAtuais.add(acao);
 	}
 
-	public List<InvestidorAgentBDI> getListaInvestidores() {
+	public List<InvestidorBDI> getListaInvestidores() {
 		return this.ListaInvestidores;
 	}
 
-	public void addListaInvestidores(InvestidorAgentBDI agente) {
+	public void addListaInvestidores(InvestidorBDI agente) {
 		this.ListaInvestidores.add(agente);
-	}
+	}*/
 
 
-	
-	public IFuture<Void> getValoresBolsa() {
-		for(Bolsa bol: this.ListaBolsa) {
-			bol.imprime();
-		}
 
-		return new Future<>();
+	public List<Bolsa> getValoresBolsa() {
+		System.out.println("Vou passar a bolsa para o investidor");
+		return this.ListaBolsa;
 	}
 
 	public void updateBolsa() {
 		int FlagUpdate;
 		Cotacao cot;
 		double newCot;
-		
-		
+
+
 		for(Bolsa bol: this.ListaBolsa) {
 			FlagUpdate = ThreadLocalRandom.current().nextInt(0, 6);
 			cot = bol.getListVariacaoCotacao().get(bol.getListVariacaoCotacao().size()-1);
@@ -141,8 +135,8 @@ public class BolsaAgentBDI implements BolsaService {
 			bol.addListVariacaoCotacao(cot);
 		}
 	}
-
-	public void comprarAcao(InvestidorAgentBDI agent, String nomeAcao, double valorDeCompra) {
+	/*
+	public void comprarAcao(InvestidorBDI agent, String nomeAcao, double valorDeCompra) {
 		Bolsa bolsa = null;
 		Acao acao = null;
 		Cotacao lastCotacao = null;
@@ -162,8 +156,8 @@ public class BolsaAgentBDI implements BolsaService {
 			System.out.println("Bolsa a comprar não foi encontrada");
 		}
 	}
-	
-	public void venderAcao(InvestidorAgentBDI agent, String nomeAcao) {
+
+	public void venderAcao(InvestidorBDI agent, String nomeAcao) {
 		Acao acaoAretirar = null, acaoAtual = null;
 		Bolsa bolsa = null;
 		Cotacao lastCotacao = null;
@@ -171,15 +165,15 @@ public class BolsaAgentBDI implements BolsaService {
 			if(ac.getNomeBolsa().equals(nomeAcao))
 				acaoAretirar = ac;
 		}
-		
+
 		if(acaoAretirar != null) {
-			
+
 			for(Bolsa bol: ListaBolsa) {
 				if(bol.getNome().equals(nomeAcao))
 					bolsa = bol;
 			}
 			lastCotacao = bolsa.getListVariacaoCotacao().get(bolsa.getListVariacaoCotacao().size()-1);
-			
+
 			double taxa = lastCotacao.getCotacao() - acaoAretirar.getCotacao().getCotacao();
 			double valorAretirar = acaoAretirar.getValorDeCompra()+acaoAretirar.getValorDeCompra()*taxa;
 			valorAretirar = Auxiliar.round(valorAretirar,2);
@@ -187,13 +181,13 @@ public class BolsaAgentBDI implements BolsaService {
 			agent.addListAcoesVendidas(acaoAtual);
 			agent.addCash(valorAretirar);
 			agent.getListAcoesAtuais().remove(acaoAretirar);
-			
+
 		}else {
 			System.out.println("Bolsa a vender não foi encontrada");
 		}
-		
-	}
-	
+
+	}*/
+
 	public void imprimeBolsa() {
 		for(Bolsa bol: this.ListaBolsa) {
 			bol.imprime();

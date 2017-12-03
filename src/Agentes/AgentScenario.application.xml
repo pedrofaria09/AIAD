@@ -15,7 +15,8 @@ http://jadex.sourceforge.net/jadexapplication-2.2.xsd"
 		<configuration name="Initial-Test">
 			<components>
 				<component type="Bolsa" name="Bolsa" />
-				<component type="Investidor" name="Investidor" />
+				<component type="Investidor" name="Investidor1" />
+				<component type="Investidor" name="Investidor2" />
 			</components>
 		</configuration>
 	</configurations>
