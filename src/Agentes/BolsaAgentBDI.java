@@ -53,15 +53,9 @@ public class BolsaAgentBDI implements BolsaService {
 		}
 	}
 	/*
-	//@Belief
-	private List<Bolsa> ListaBolsa = new ArrayList<Bolsa>();
-	//@Belief
 	private List<Acao> ListaAcoesCompradas = new ArrayList<Acao>();
-	//@Belief
 	private List<Acao> ListaAcoesVendidas = new ArrayList<Acao>();
-	//@Belief
 	private List<Acao> ListaAcoesAtuais = new ArrayList<Acao>();
-	//@Belief
 	private List<InvestidorBDI> ListaInvestidores = new ArrayList<InvestidorBDI>();
 
 	// Getters and adds
@@ -117,12 +111,11 @@ public class BolsaAgentBDI implements BolsaService {
 		for(Bolsa bol: this.ListaBolsa) {
 			FlagUpdate = ThreadLocalRandom.current().nextInt(0, 6);
 			cot = bol.getListVariacaoCotacao().get(bol.getListVariacaoCotacao().size()-1);
-
-			if(FlagUpdate == 0 || FlagUpdate == 1 || FlagUpdate == 5) {
-				double auxCotacao = ThreadLocalRandom.current().nextDouble(0.01,0.06);
+			double auxCotacao = ThreadLocalRandom.current().nextDouble(0.01,0.06);
+			
+			if(FlagUpdate == 0 || FlagUpdate == 1 || FlagUpdate == 2) {
 				newCot = (cot.getCotacao() + cot.getCotacao()*auxCotacao);
-			}else if(FlagUpdate == 2 || FlagUpdate == 3){
-				double auxCotacao = ThreadLocalRandom.current().nextDouble(0.01,0.06);
+			}else if(FlagUpdate == 3 || FlagUpdate == 4){
 				newCot = (cot.getCotacao() - cot.getCotacao()*auxCotacao);
 				if(newCot < 0)
 					newCot = 0;

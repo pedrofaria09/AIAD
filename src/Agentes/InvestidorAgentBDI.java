@@ -26,19 +26,21 @@ import jadex.bdiv3.annotation.Trigger;
 
 @Agent
 public class InvestidorAgentBDI{
-	/*private List<Acao> ListAcoesCompradas = new ArrayList<Acao>();
-	private List<Acao> ListAcoesAtuais = new ArrayList<Acao>();
-	private List<Acao> ListAcoesVendidas = new ArrayList<Acao>();
-	private List<InvestidorBDI> ListASeguir = new ArrayList<InvestidorBDI>();
-	private double cash = 100000;*/
-	//private String nome;
-
+	private List<Acao> ListAcoesCompradas;
+	private List<Acao> ListAcoesAtuais;
+	private List<Acao> ListAcoesVendidas;
+	private List<InvestidorAgentBDI> ListASeguir;
+	private List<Bolsa> valoresBolsa;
+	
+	private String nome;
+	private double cash = 100000;
+	
 	private final int TIMETOASKBOLSA = 7000;
-
+	private final double PERCENTTOBUY = 5; //5% of variation of the action
+	private final int NUMBEROFCOTACOESTOCHECK = 3;
+	
 	@Agent
 	protected BDIAgent agent;
-
-	private List<Bolsa> valoresBolsa;
 
 	@Belief
 	public List<Bolsa> getValoresBolsa(){
@@ -50,34 +52,49 @@ public class InvestidorAgentBDI{
 		this.valoresBolsa = lista;
 	}
 
-	/*public InvestidorAgentBDI(String nome) {
-		this.nome = nome;
-	}
-
-	public InvestidorAgentBDI() {
-		System.out.println("Criou o Agente Investidor");
-	}*/
-
-	@Plan(trigger=@Trigger(factchangeds="valoresBolsa"))
-	public void printTime() {
-		System.out.println("A bolsa foi alterada, oportunidade de analisar os valores!");
-	}	
-
-
 	@AgentBody
 	public void body() {
 		this.valoresBolsa = new ArrayList<Bolsa>();
+		this.ListAcoesCompradas = new ArrayList<Acao>();
+		this.ListAcoesAtuais = new ArrayList<Acao>();
+		this.ListAcoesVendidas = new ArrayList<Acao>();
+		this.ListASeguir = new ArrayList<InvestidorAgentBDI>();
+		this.nome = agent.getComponentIdentifier().getLocalName();
 		agent.adoptPlan("getValoresABolsa");
 
 	}
+	
+	@Plan(trigger=@Trigger(factchangeds="valoresBolsa"))
+	public void printTime() {
+		System.out.println("A bolsa foi alterada, oportunidade de analisar os valores!");
+		checkBuyActions();
+	}	
+
+	private void checkBuyActions() {
+		double valor = 0;
+		
+		// Get Percent of difference taking into action PERCENTTOBUY value
+		for(Bolsa bol: getValoresBolsa()) {
+			if(bol.getListVariacaoCotacao().size() >= NUMBEROFCOTACOESTOCHECK) {
+				valor = bol.getPercetOfNCotacoes(NUMBEROFCOTACOESTOCHECK);
+				if(valor >= PERCENTTOBUY) {
+					System.out.println("vou comprar a acao: " + bol.getNome());
+					//CANT BUY A ACTION THAT ALREADY HAVE!!!!
+				}
+			}
+		}
+	}
+	
 
 	@Plan
 	public void getValoresABolsa(IPlan plan) {
 		while(true) {
 			plan.waitFor(TIMETOASKBOLSA).get();
 			BolsaService bolsa = SServiceProvider.getService(agent.getServiceProvider(), BolsaService.class, RequiredServiceInfo.SCOPE_PLATFORM).get();
-			System.out.println("AGENTE: " + agent.getComponentIdentifier().getLocalName());
+			
 			setValoresBolsa(bolsa.getValoresBolsa());
+			
+			imprime();
 		}
 	}
 
@@ -86,12 +103,7 @@ public class InvestidorAgentBDI{
 			bol.imprime();
 		}
 	}
-
-	/*public void addListAcoesCompradas(Acao acao) {
-		this.ListAcoesCompradas.add(acao);
-		this.ListAcoesAtuais.add(acao);
-	}
-
+	
 	public List<Acao> getListAcoesCompradas() {
 		return this.ListAcoesCompradas;
 	}
@@ -99,16 +111,25 @@ public class InvestidorAgentBDI{
 	public List<Acao> getListAcoesAtuais() {
 		return this.ListAcoesAtuais;
 	}
+	
+	public void addListAcoesCompradas(Acao acao) {
+		this.ListAcoesCompradas.add(acao);
+		this.ListAcoesAtuais.add(acao);
+	}
+
+	public List<Acao> getListAcoesVendidas() {
+		return ListAcoesVendidas;
+	}
 
 	public void addListAcoesVendidas(Acao acao) {
 		this.ListAcoesVendidas.add(acao);
 	}
 
-	public List<InvestidorBDI> getListASeguir() {
+	public List<InvestidorAgentBDI> getListASeguir() {
 		return this.ListASeguir;
 	}
 
-	public void addListASeguir(InvestidorBDI agent) {
+	public void addListASeguir(InvestidorAgentBDI agent) {
 		this.ListASeguir.add(agent);
 	}
 
@@ -129,39 +150,39 @@ public class InvestidorAgentBDI{
 	}
 
 	public void imprime() {
-		System.out.println("Nome: " + this.nome + " - Valor em conta: " + this.cash);
+		System.out.println("Nome: " + getNome() + " - Valor em conta: " + getCash());
 
-		System.out.println("Acoes Atuais: " + this.ListAcoesAtuais.size());
-		if(this.ListAcoesAtuais.size() > 0) {
-			for(Acao ac : this.ListAcoesAtuais) {
+		System.out.println("Acoes Atuais: " + getListAcoesAtuais().size());
+		if(getListAcoesAtuais().size() > 0) {
+			for(Acao ac : getListAcoesAtuais()) {
 				System.out.print("\t ");
 				ac.imprime();
 			}
 		}
 
-		System.out.println("Acoes compradas: " + this.ListAcoesCompradas.size());
-		if(this.ListAcoesCompradas.size() > 0) {
-			for(Acao ac : this.ListAcoesCompradas) {
+		System.out.println("Acoes compradas: " + getListAcoesCompradas().size());
+		if(getListAcoesCompradas().size() > 0) {
+			for(Acao ac : getListAcoesCompradas()) {
 				System.out.print("\t ");
 				ac.imprime();
 			}
 		}
 
-		System.out.println("Acoes Vendidas: " + this.ListAcoesVendidas.size());
-		if(this.ListAcoesVendidas.size() > 0) {
-			for(Acao ac : this.ListAcoesVendidas) {
+		System.out.println("Acoes Vendidas: " + getListAcoesVendidas().size());
+		if(getListAcoesVendidas().size() > 0) {
+			for(Acao ac : getListAcoesVendidas()) {
 				System.out.print("\t ");
 				ac.imprime();
 			}
 		}
 
-		System.out.println("Seguidores: " + this.ListASeguir.size());
-		if(this.ListASeguir.size() > 0) {
-			for(InvestidorBDI ag : this.ListASeguir) {
+		System.out.println("Seguidores: " + getListASeguir().size());
+		if(getListASeguir().size() > 0) {
+			for(InvestidorAgentBDI ag : getListASeguir()) {
 				System.out.println("\t " + ag.getNome());
 			}
 		}
 
-	}*/
+	}
 
 }

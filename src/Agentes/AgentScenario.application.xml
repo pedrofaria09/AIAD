@@ -16,7 +16,6 @@ http://jadex.sourceforge.net/jadexapplication-2.2.xsd"
 			<components>
 				<component type="Bolsa" name="Bolsa" />
 				<component type="Investidor" name="Investidor1" />
-				<component type="Investidor" name="Investidor2" />
 			</components>
 		</configuration>
 	</configurations>

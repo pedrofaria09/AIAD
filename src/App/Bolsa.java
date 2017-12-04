@@ -23,6 +23,15 @@ public class Bolsa {
 	public void addListVariacaoCotacao(Cotacao cotacao) {
 		this.ListVariacaoCotacao.add(cotacao);
 	}
+	
+	public double getPercetOfNCotacoes(int number) {
+		int ultimo = getListVariacaoCotacao().size()-1;
+		double valorUltimo = getListVariacaoCotacao().get(ultimo).getCotacao();
+		int primeiro = ultimo + 1 - number;
+		double valorPrimeiro = getListVariacaoCotacao().get(primeiro).getCotacao();
+		
+		return (100-(valorPrimeiro*100/valorUltimo));
+	}
 
 	public void imprime() {
 		SimpleDateFormat ft = new SimpleDateFormat ("H:mm:ss d/M/y");
