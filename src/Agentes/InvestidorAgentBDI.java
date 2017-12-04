@@ -35,9 +35,11 @@ public class InvestidorAgentBDI{
 	private String nome;
 	private double cash = 100000;
 	
+	private final int VALUETOBUYACTION = 2000;
 	private final int TIMETOASKBOLSA = 7000;
-	private final double PERCENTTOBUY = 5; //5% of variation of the action
-	private final int NUMBEROFCOTACOESTOCHECK = 3;
+	private final int PERCENTTOBUY = 5; //5% of variation of the action
+	private final int PERCENTTOSELL = 5;
+	private final int NUMBEROFCOTACOESTOCHECK = 3; // will check the last 3 actions to buy.
 	
 	@Agent
 	protected BDIAgent agent;
@@ -50,6 +52,19 @@ public class InvestidorAgentBDI{
 	@Belief
 	public void setValoresBolsa(List<Bolsa> lista){
 		this.valoresBolsa = lista;
+	}
+	
+	public List<Acao> getListAcoesCompradas() {
+		return this.ListAcoesCompradas;
+	}
+	
+	public List<Acao> getListAcoesAtuais() {
+		return this.ListAcoesAtuais;
+	}
+
+	public void addListAcoesCompradas(Acao acao) {
+		this.ListAcoesCompradas.add(acao);
+		this.ListAcoesAtuais.add(acao);
 	}
 
 	@AgentBody
@@ -68,23 +83,51 @@ public class InvestidorAgentBDI{
 	public void printTime() {
 		System.out.println("A bolsa foi alterada, oportunidade de analisar os valores!");
 		checkBuyActions();
-	}	
+		//checkSellActions();
+	}
+
 
 	private void checkBuyActions() {
 		double valor = 0;
 		
 		// Get Percent of difference taking into action PERCENTTOBUY value
 		for(Bolsa bol: getValoresBolsa()) {
+			valor = 0;
 			if(bol.getListVariacaoCotacao().size() >= NUMBEROFCOTACOESTOCHECK) {
 				valor = bol.getPercetOfNCotacoes(NUMBEROFCOTACOESTOCHECK);
-				if(valor >= PERCENTTOBUY) {
+				if(valor >= PERCENTTOBUY && checkIfDontHaveAction(bol.getNome())) {
 					System.out.println("vou comprar a acao: " + bol.getNome());
-					//CANT BUY A ACTION THAT ALREADY HAVE!!!!
+					buyAction(bol);
 				}
 			}
 		}
 	}
 	
+
+	private void buyAction(Bolsa bolsa) {
+		
+		Cotacao lastCotacao = bolsa.getListVariacaoCotacao().get(bolsa.getListVariacaoCotacao().size()-1);
+		Acao acao = new Acao(getNome(),bolsa.getNome(),lastCotacao, VALUETOBUYACTION);
+
+		addListAcoesCompradas(acao);
+		retCash(VALUETOBUYACTION);
+		
+		//TODO maybe change this to a Trigger????
+		System.out.println("Comprei a ação: " + bolsa.getNome() + " com uma cotacao de: " + lastCotacao.getCotacao() + " gastando " + VALUETOBUYACTION);
+	}
+
+	private boolean checkIfDontHaveAction(String nome) {
+		
+		if (getListAcoesAtuais().isEmpty())
+			return true;
+		
+		for(Acao ac : getListAcoesAtuais()) {
+			if(ac.getNomeBolsa().equals(nome))
+				return false;
+		}
+		
+		return true;
+	}
 
 	@Plan
 	public void getValoresABolsa(IPlan plan) {
@@ -103,19 +146,7 @@ public class InvestidorAgentBDI{
 			bol.imprime();
 		}
 	}
-	
-	public List<Acao> getListAcoesCompradas() {
-		return this.ListAcoesCompradas;
-	}
 
-	public List<Acao> getListAcoesAtuais() {
-		return this.ListAcoesAtuais;
-	}
-	
-	public void addListAcoesCompradas(Acao acao) {
-		this.ListAcoesCompradas.add(acao);
-		this.ListAcoesAtuais.add(acao);
-	}
 
 	public List<Acao> getListAcoesVendidas() {
 		return ListAcoesVendidas;
