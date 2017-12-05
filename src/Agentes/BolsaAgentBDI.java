@@ -49,7 +49,7 @@ public class BolsaAgentBDI implements BolsaService {
 		while(true) {
 			updateBolsa();
 			plan.waitFor(TIMEBOLSA).get();
-			System.out.println("Bolsa Atualizada");
+			//System.out.println("Bolsa Atualizada");
 		}
 	}
 	/*
@@ -98,7 +98,7 @@ public class BolsaAgentBDI implements BolsaService {
 
 
 	public List<Bolsa> getValoresBolsa() {
-		System.out.println("Vou passar a bolsa para o investidor");
+		//System.out.println("Vou passar a bolsa para o investidor");
 		return this.ListaBolsa;
 	}
 
