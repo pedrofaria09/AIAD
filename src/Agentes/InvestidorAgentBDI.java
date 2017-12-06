@@ -1,9 +1,12 @@
 package Agentes;
 import java.text.SimpleDateFormat;
+import jadex.bdiv3.annotation.*;
+import jadex.micro.annotation.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.concurrent.ThreadLocalRandom;
 
 import App.Acao;
 import App.Bolsa;
@@ -23,11 +26,21 @@ import jadex.commons.future.IResultListener;
 import jadex.micro.MicroAgent;
 import jadex.micro.annotation.Agent;
 import jadex.micro.annotation.AgentBody;
+import jadex.micro.annotation.AgentCreated;
 import jadex.micro.annotation.ProvidedServices;
 import jadex.micro.annotation.ProvidedService;
 import jadex.bdiv3.annotation.Trigger;
 
 @Agent
+@Arguments({
+	@Argument(name="nome", clazz = String.class, defaultvalue="N/A"),
+	@Argument(name="valueToBuyAction", clazz = int.class, defaultvalue="-1"),
+	@Argument(name="percentToBuy", clazz = int.class, defaultvalue="-1"),
+	@Argument(name="numberOfCotacoesToCheck", clazz = int.class, defaultvalue="1"),
+	@Argument(name="isRandomAgent", clazz = boolean.class, defaultvalue="false"),
+	@Argument(name="percentToSell", clazz = int.class, defaultvalue="-1"),
+	@Argument(name="timeToAskBolsa", clazz = int.class, defaultvalue="-1")
+})
 public class InvestidorAgentBDI{
 	private List<Acao> ListAcoesCompradas;
 	private List<Acao> ListAcoesAtuais;
@@ -38,14 +51,35 @@ public class InvestidorAgentBDI{
 	private String nome;
 	private double cash = 100000;
 	
-	private final int VALUETOBUYACTION = 2000;
-	private final int TIMETOASKBOLSA = 7000;
-	private final int PERCENTTOBUY = 5; //5% of variation of the action
-	private final int PERCENTTOSELL = 5;
-	private final int NUMBEROFCOTACOESTOCHECK = 3; // will check the last 3 actions to buy.
+	private int timeToAskBolsa;	
+	private int valueToBuyAction;	
+	private int percentToBuy; //5% of variation of the action
+	private int percentToSell;
+	private int numberOfCotacoesToCheck; // will check the last 3 actions to buy.
+	private boolean isRandomAgent;
 	
 	@Agent
 	protected BDIAgent agent;
+	
+	/*public InvestidorAgentBDI(String nome, int money, int percentB, int percentS, int numberCotacoes, boolean random) {
+		this.nome = nome;
+		this.valueToBuyAction = money;
+		this.percentToBuy = percentB;
+		this.percentToSell = percentS;
+		this.numberOfCotacoesToCheck = numberCotacoes;
+		this.isRandomAgent = random;
+	}*/
+	
+	@AgentCreated
+	public void init() {
+		this.nome = (String) agent.getArgument("nome");
+		this.valueToBuyAction = (int) agent.getArgument("valueToBuyAction");
+		this.percentToBuy = (int) agent.getArgument("percentToBuy");
+		this.percentToSell= (int)agent.getArgument("percentToSell");
+		this.numberOfCotacoesToCheck = (int) agent.getArgument("numberOfCotacoesToCheck");
+		this.isRandomAgent = (boolean) agent.getArgument("isRandomAgent");
+		this.timeToAskBolsa = (int) agent.getArgument("timeToAskBolsa");
+	}
 
 	@Belief
 	public List<Bolsa> getValoresBolsa(){
@@ -77,16 +111,22 @@ public class InvestidorAgentBDI{
 		this.ListAcoesAtuais = new ArrayList<Acao>();
 		this.ListAcoesVendidas = new ArrayList<Acao>();
 		this.ListASeguir = new ArrayList<InvestidorAgentBDI>();
-		this.nome = agent.getComponentIdentifier().getLocalName();
+
 		agent.adoptPlan("getValoresABolsa");
 
 	}
 	
 	@Plan(trigger=@Trigger(factchangeds="valoresBolsa"))
 	public void printTime() {
-		System.out.println("A bolsa foi alterada, oportunidade de analisar os valores!");
-		checkBuyActions();
-		checkSellActions();
+		//System.out.println("A bolsa foi alterada, oportunidade de analisar os valores!");
+		
+		if(this.isRandomAgent) {
+			checkBuyActionsRandom();
+			checkSellActionsRandom();
+		} else {
+			checkBuyActions();
+			checkSellActions();
+		}
 	}
 
 
@@ -97,7 +137,8 @@ public class InvestidorAgentBDI{
 			for(int i = 0; i< this.ListAcoesAtuais.size(); i++) {
 				Acao acao = this.ListAcoesAtuais.get(i);
 				valor = getPercetWithAtualCotacao(acao);
-				if(valor >= PERCENTTOSELL) {
+				if(valor >= percentToSell) {
+					System.out.print("["+this.nome+"] ");
 					System.out.println("VOU VENDER :" + acao.getNomeBolsa() + " a uma %: " + valor);
 					sellAction(acao);
 					this.ListAcoesAtuais.remove(acao);
@@ -106,16 +147,27 @@ public class InvestidorAgentBDI{
 			}
 		}
 		
-//		ListIterator<Acao> iter = ListAcoesAtuais.listIterator();
-//		while(iter.hasNext()){
-//			Acao acao = iter.next();
-//			valor = getPercetWithAtualCotacao(acao);
-//			if(valor >= PERCENTTOSELL) {
-//				System.out.println("VOU VENDER :" + acao.getNomeBolsa() + " a uma %: " + valor);
-//				sellAction(acao);
-//				ListAcoesAtuais.remove(acao);
-//			}
-//		}
+	}
+	
+	private void checkSellActionsRandom() {
+		double valor = 0;
+		
+		if(!this.ListAcoesAtuais.isEmpty()) {
+			for(int i = 0; i< this.ListAcoesAtuais.size(); i++) {
+				Acao acao = this.ListAcoesAtuais.get(i);
+
+				int FlagUpdate = ThreadLocalRandom.current().nextInt(0, 2);
+				
+				if(FlagUpdate == 1) {
+					System.out.print("["+this.nome+"] ");
+					System.out.println("VOU VENDER :" + acao.getNomeBolsa() + " a uma %: " + valor);
+					sellAction(acao);
+					this.ListAcoesAtuais.remove(acao);
+					i--;
+				}
+			}
+		}
+		
 	}
 
 	private void sellAction(Acao ac) {
@@ -152,6 +204,24 @@ public class InvestidorAgentBDI{
 		}
 		return 0;
 	}
+	
+	private void checkBuyActionsRandom() {
+		double valor = 0;
+		
+		// Get Percent of difference taking into action PERCENTTOBUY value
+		for(Bolsa bol: getValoresBolsa()) {
+			valor = 0;
+			if(bol.getListVariacaoCotacao().size() >= numberOfCotacoesToCheck) {				
+				if(checkIfDontHaveAction(bol.getNome())) {
+					int FlagUpdate = ThreadLocalRandom.current().nextInt(0, 2);
+					
+					if(FlagUpdate == 1) {
+						buyAction(bol);
+					}					
+				}
+			}
+		}
+	}
 
 	private void checkBuyActions() {
 		double valor = 0;
@@ -159,9 +229,9 @@ public class InvestidorAgentBDI{
 		// Get Percent of difference taking into action PERCENTTOBUY value
 		for(Bolsa bol: getValoresBolsa()) {
 			valor = 0;
-			if(bol.getListVariacaoCotacao().size() >= NUMBEROFCOTACOESTOCHECK) {
-				valor = bol.getPercetOfNCotacoes(NUMBEROFCOTACOESTOCHECK);
-				if(valor >= PERCENTTOBUY && checkIfDontHaveAction(bol.getNome())) {
+			if(bol.getListVariacaoCotacao().size() >= numberOfCotacoesToCheck) {
+				valor = bol.getPercetOfNCotacoes(numberOfCotacoesToCheck);
+				if(valor >= percentToBuy && checkIfDontHaveAction(bol.getNome())) {
 					buyAction(bol);
 				}
 			}
@@ -172,13 +242,14 @@ public class InvestidorAgentBDI{
 	private void buyAction(Bolsa bolsa) {
 		
 		Cotacao lastCotacao = bolsa.getListVariacaoCotacao().get(bolsa.getListVariacaoCotacao().size()-1);
-		Acao acao = new Acao(getNome(),bolsa.getNome(),lastCotacao, VALUETOBUYACTION);
+		Acao acao = new Acao(getNome(),bolsa.getNome(),lastCotacao, valueToBuyAction);
 
 		addListAcoesCompradas(acao);
-		retCash(VALUETOBUYACTION);
+		retCash(valueToBuyAction);
 		
 		//TODO maybe change this to a Trigger????
-		System.out.println("Comprei a ação: " + bolsa.getNome() + " com uma cotacao de: " + lastCotacao.getCotacao() + " gastando " + VALUETOBUYACTION);
+		System.out.print("["+this.nome+"] ");
+		System.out.println("Comprei a acao: " + bolsa.getNome() + " com uma cotacao de: " + lastCotacao.getCotacao() + " gastando " + valueToBuyAction);
 		System.out.println("Valor em conta: " + getCash());
 	}
 
@@ -198,7 +269,7 @@ public class InvestidorAgentBDI{
 	@Plan
 	public void getValoresABolsa(IPlan plan) {
 		while(true) {
-			plan.waitFor(TIMETOASKBOLSA).get();
+			plan.waitFor(timeToAskBolsa).get();
 			BolsaService bolsa = SServiceProvider.getService(agent.getServiceProvider(), BolsaService.class, RequiredServiceInfo.SCOPE_PLATFORM).get();
 			
 			setValoresBolsa(bolsa.getValoresBolsa());
