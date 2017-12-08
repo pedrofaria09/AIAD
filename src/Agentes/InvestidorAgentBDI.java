@@ -42,7 +42,8 @@ import javax.swing.*;
 	@Argument(name="numberOfCotacoesToCheck", clazz = int.class, defaultvalue="1"),
 	@Argument(name="isRandomAgent", clazz = boolean.class, defaultvalue="false"),
 	@Argument(name="percentToSell", clazz = int.class, defaultvalue="-1"),
-	@Argument(name="timeToAskBolsa", clazz = int.class, defaultvalue="-1")
+	@Argument(name="timeToAskBolsa", clazz = int.class, defaultvalue="-1"),
+	@Argument(name="goalActionsNumber", clazz = int.class, defaultvalue="-1")
 })
 public class InvestidorAgentBDI{
 	private List<Acao> ListAcoesCompradas;
@@ -61,19 +62,10 @@ public class InvestidorAgentBDI{
 	private int numberOfCotacoesToCheck; // will check the last 3 actions to buy.
 	private boolean isRandomAgent;
 	private AgentLogFrame frame;
-
+	private int goalActionsNumber;
 	
 	@Agent
 	protected BDIAgent agent;
-	
-	/*public InvestidorAgentBDI(String nome, int money, int percentB, int percentS, int numberCotacoes, boolean random) {
-		this.nome = nome;
-		this.valueToBuyAction = money;
-		this.percentToBuy = percentB;
-		this.percentToSell = percentS;
-		this.numberOfCotacoesToCheck = numberCotacoes;
-		this.isRandomAgent = random;
-	}*/
 	
 	@AgentCreated
 	public void init() {
@@ -84,6 +76,7 @@ public class InvestidorAgentBDI{
 		this.numberOfCotacoesToCheck = (int) agent.getArgument("numberOfCotacoesToCheck");
 		this.isRandomAgent = (boolean) agent.getArgument("isRandomAgent");
 		this.timeToAskBolsa = (int) agent.getArgument("timeToAskBolsa");
+		this.goalActionsNumber = (int) agent.getArgument("goalActionsNumber");
 
 		frame = new AgentLogFrame();
 		SwingUtilities.invokeLater(new Runnable() {
@@ -120,7 +113,17 @@ public class InvestidorAgentBDI{
 		this.ListAcoesCompradas.add(acao);
 		this.ListAcoesAtuais.add(acao);
 	}
-
+	
+	@Goal
+	public class AGoalActionsNumber {
+		@GoalResult
+		public int r;
+	 
+		public AGoalActionsNumber(int r) {
+			this.r = r;
+		}
+	}
+	
 	@AgentBody
 	public void body() {
 		this.valoresBolsa = new ArrayList<Bolsa>();
@@ -128,20 +131,38 @@ public class InvestidorAgentBDI{
 		this.ListAcoesAtuais = new ArrayList<Acao>();
 		this.ListAcoesVendidas = new ArrayList<Acao>();
 		this.ListASeguir = new ArrayList<InvestidorAgentBDI>();
-
-		agent.adoptPlan("getValoresABolsa");
-
+		
+		agent.dispatchTopLevelGoal(new AGoalActionsNumber(this.goalActionsNumber));	
 	}
+	
+	@Plan(trigger=@Trigger(goals=AGoalActionsNumber.class))
+	public void getValoresABolsa(IPlan plan) {
+		while(this.goalActionsNumber > 0) {
+			plan.waitFor(timeToAskBolsa).get();
+			BolsaService bolsa = SServiceProvider.getService(agent.getServiceProvider(), BolsaService.class, RequiredServiceInfo.SCOPE_PLATFORM).get();
+			
+			setValoresBolsa(bolsa.getValoresBolsa());
+		}
+		
+		imprime();
+		System.out.println("["+this.nome+"] - Acabei vendendo o número de ações desejadas");
+		
+	}
+
 	
 	@Plan(trigger=@Trigger(factchangeds="valoresBolsa"))
 	public void printTime() {
 		//System.out.println("A bolsa foi alterada, oportunidade de analisar os valores!");
 		
 		if(this.isRandomAgent) {
-			checkBuyActionsRandom();
+			if(this.goalActionsNumber > 0) {
+				checkBuyActionsRandom();
+			}
 			checkSellActionsRandom();
 		} else {
-			checkBuyActions();
+			if(this.goalActionsNumber > 0) {
+				checkBuyActions();
+			}
 			checkSellActions();
 		}
 	}
@@ -159,6 +180,7 @@ public class InvestidorAgentBDI{
 					sellAction(acao);
 					this.ListAcoesAtuais.remove(acao);
 					i--;
+					this.goalActionsNumber--;
 				}
 			}
 		}
@@ -179,6 +201,7 @@ public class InvestidorAgentBDI{
 					sellAction(acao);
 					this.ListAcoesAtuais.remove(acao);
 					i--;
+					this.goalActionsNumber--;
 				}
 			}
 		}
@@ -280,23 +303,7 @@ public class InvestidorAgentBDI{
 		
 		return true;
 	}
-
-	@Plan
-	public void getValoresABolsa(IPlan plan) {
-		while(true) {
-			plan.waitFor(timeToAskBolsa).get();
-			BolsaService bolsa = SServiceProvider.getService(agent.getServiceProvider(), BolsaService.class, RequiredServiceInfo.SCOPE_PLATFORM).get();
-			
-			setValoresBolsa(bolsa.getValoresBolsa());
-
-//			for(Bolsa bol: getValoresBolsa()) {
-//				bol.imprime();
-//			}
-			
-			//imprime();
-		}
-	}
-
+	
 	public void imprimeBolsa() {
 		for(Bolsa bol: getValoresBolsa()) {
 			bol.imprime();

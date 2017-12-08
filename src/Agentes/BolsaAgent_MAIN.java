@@ -22,32 +22,39 @@ public class BolsaAgent_MAIN {
 		//InvestidorAgentBDI agenteCauteloso = new InvestidorAgentBDI("Agente Cauteloso", 2000, 10, 5, 4, false);	
 
 		//Agente Arriscado
-		Map<String, Object> arriscadoArgs = new HashMap<String, Object>();
-		arriscadoArgs.put("nome", "Agente Arriscado");
-		arriscadoArgs.put("valueToBuyAction", 3000);
-		arriscadoArgs.put("percentToBuy", 5);
-		arriscadoArgs.put("percentToSell", 10);
-		arriscadoArgs.put("numberOfCotacoesToCheck", 3);
-		arriscadoArgs.put("timeToAskBolsa", 7050);
-		arriscadoArgs.put("isRandomAgent", false);
-
+        Map<String, Object> arriscadoArgs = new HashMap<String, Object>();
+        arriscadoArgs.put("nome", "Agente Arriscado");
+        arriscadoArgs.put("valueToBuyAction", 3000);
+        arriscadoArgs.put("percentToBuy", 5);
+        arriscadoArgs.put("percentToSell", 10);
+        arriscadoArgs.put("numberOfCotacoesToCheck", 3);
+        arriscadoArgs.put("timeToAskBolsa", 7050);
+        arriscadoArgs.put("isRandomAgent", false);
+        arriscadoArgs.put("goalActionsNumber", 5);
+        
 		//Agente Cauteloso
-		Map<String, Object> cautelosoArgs = new HashMap<String, Object>();
-		cautelosoArgs.put("nome", "Agente Cauteloso");
-		cautelosoArgs.put("valueToBuyAction", 2000);
-		cautelosoArgs.put("percentToBuy", 7);
-		cautelosoArgs.put("percentToSell", 5);
-		cautelosoArgs.put("numberOfCotacoesToCheck", 3);
-		cautelosoArgs.put("timeToAskBolsa", 7000);
-		cautelosoArgs.put("isRandomAgent", false);
-
+        Map<String, Object> cautelosoArgs = new HashMap<String, Object>();
+        cautelosoArgs.put("nome", "Agente Cauteloso");
+        cautelosoArgs.put("valueToBuyAction", 2000);
+        cautelosoArgs.put("percentToBuy", 7);
+        cautelosoArgs.put("percentToSell", 5);
+        cautelosoArgs.put("numberOfCotacoesToCheck", 3);
+        cautelosoArgs.put("timeToAskBolsa", 7000);
+        cautelosoArgs.put("isRandomAgent", false);
+        cautelosoArgs.put("goalActionsNumber", 4);
+        
 		//Agente Random
-		Map<String, Object> randomArgs = new HashMap<String, Object>();
-		randomArgs.put("nome", "Agente Random");
-		randomArgs.put("valueToBuyAction", 2000);
-		randomArgs.put("numberOfCotacoesToCheck", 3);
-		randomArgs.put("timeToAskBolsa", 6950);
-		randomArgs.put("isRandomAgent", true);
+        Map<String, Object> randomArgs = new HashMap<String, Object>();
+        randomArgs.put("nome", "Agente Random");
+        randomArgs.put("valueToBuyAction", 2000);
+        randomArgs.put("numberOfCotacoesToCheck", 3);
+        randomArgs.put("timeToAskBolsa", 6950);
+        randomArgs.put("isRandomAgent", true);
+        randomArgs.put("goalActionsNumber", 3);
+        
+        CreationInfo investidorArriscadoInfo = new CreationInfo(arriscadoArgs);
+        CreationInfo investidorCautelosoInfo = new CreationInfo(cautelosoArgs);
+        CreationInfo investidorRandomInfo = new CreationInfo(randomArgs);
 
 		CreationInfo investidorArriscadoInfo = new CreationInfo(arriscadoArgs);
 		CreationInfo investidorCautelosoInfo = new CreationInfo(cautelosoArgs);
