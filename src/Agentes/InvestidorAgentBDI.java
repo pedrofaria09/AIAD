@@ -30,6 +30,9 @@ import jadex.micro.annotation.AgentCreated;
 import jadex.micro.annotation.ProvidedServices;
 import jadex.micro.annotation.ProvidedService;
 import jadex.bdiv3.annotation.Trigger;
+import Auxiliar.AgentLogFrame;
+
+import javax.swing.*;
 
 @Agent
 @Arguments({
@@ -57,6 +60,8 @@ public class InvestidorAgentBDI{
 	private int percentToSell;
 	private int numberOfCotacoesToCheck; // will check the last 3 actions to buy.
 	private boolean isRandomAgent;
+	private AgentLogFrame frame;
+
 	
 	@Agent
 	protected BDIAgent agent;
@@ -79,6 +84,18 @@ public class InvestidorAgentBDI{
 		this.numberOfCotacoesToCheck = (int) agent.getArgument("numberOfCotacoesToCheck");
 		this.isRandomAgent = (boolean) agent.getArgument("isRandomAgent");
 		this.timeToAskBolsa = (int) agent.getArgument("timeToAskBolsa");
+
+		frame = new AgentLogFrame();
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				frame.setTitle(nome);
+				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				frame.jTextArea1.append("Hello! I'm Agent " + nome + "\n");
+				frame.setSize(300, 300);
+				frame.setVisible(true);
+			}
+		});
+
 	}
 
 	@Belief
@@ -138,8 +155,7 @@ public class InvestidorAgentBDI{
 				Acao acao = this.ListAcoesAtuais.get(i);
 				valor = getPercetWithAtualCotacao(acao);
 				if(valor >= percentToSell) {
-					System.out.print("["+this.nome+"] ");
-					System.out.println("VOU VENDER :" + acao.getNomeBolsa() + " a uma %: " + valor);
+					frame.jTextArea1.append("VOU VENDER :" + acao.getNomeBolsa() + " a uma %: " + valor + "\n");
 					sellAction(acao);
 					this.ListAcoesAtuais.remove(acao);
 					i--;
@@ -159,8 +175,7 @@ public class InvestidorAgentBDI{
 				int FlagUpdate = ThreadLocalRandom.current().nextInt(0, 2);
 				
 				if(FlagUpdate == 1) {
-					System.out.print("["+this.nome+"] ");
-					System.out.println("VOU VENDER :" + acao.getNomeBolsa() + " a uma %: " + valor);
+					frame.jTextArea1.append("VOU VENDER :" + acao.getNomeBolsa() + " a uma %: " + valor + "\n");
 					sellAction(acao);
 					this.ListAcoesAtuais.remove(acao);
 					i--;
@@ -190,8 +205,8 @@ public class InvestidorAgentBDI{
 		addCash(valorAretirar);
 		
 		//TODO maybe change this to a Trigger????
-		System.out.println("Vendi a acao:" + acao.getNomeBolsa() + " com uma cotacao de: " + lastCotacao.getCotacao() +" e ganhei: " + valorAretirar);
-		System.out.println("Valor em conta: " + getCash());
+		frame.jTextArea1.append("Vendi a acao:" + acao.getNomeBolsa() + " com uma cotacao de: " + lastCotacao.getCotacao() +" e ganhei: " + valorAretirar + "\n");
+		frame.jTextArea1.append("Valor em conta: " + getCash() + "\n");
 	}
 
 	private double getPercetWithAtualCotacao(Acao ac) {
@@ -248,9 +263,9 @@ public class InvestidorAgentBDI{
 		retCash(valueToBuyAction);
 		
 		//TODO maybe change this to a Trigger????
-		System.out.print("["+this.nome+"] ");
-		System.out.println("Comprei a acao: " + bolsa.getNome() + " com uma cotacao de: " + lastCotacao.getCotacao() + " gastando " + valueToBuyAction);
-		System.out.println("Valor em conta: " + getCash());
+		frame.jTextArea1.append("Comprei a acao: " + bolsa.getNome() + " com uma cotacao de: " + lastCotacao.getCotacao() + " gastando " + valueToBuyAction + "\n");
+		frame.jTextArea1.append("Valor em conta: " + getCash() + "\n");
+
 	}
 
 	private boolean checkIfDontHaveAction(String nome) {
