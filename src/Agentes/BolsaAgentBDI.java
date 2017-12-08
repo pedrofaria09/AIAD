@@ -23,6 +23,9 @@ import App.Acao;
 import App.Bolsa;
 import App.Cotacao;
 import Auxiliar.Auxiliar;
+import Auxiliar.AgentLogFrame;
+
+import javax.swing.*;
 
 @Agent
 @Service
@@ -31,8 +34,20 @@ public class BolsaAgentBDI implements BolsaService {
 	private List<Bolsa> ListaBolsa = new ArrayList<Bolsa>();
 	private final int TIMEBOLSA = 2000;
 
+	private AgentLogFrame frame;
+
 	public BolsaAgentBDI() {
 		System.out.println("Criou o Agente Bolsa");
+		frame = new AgentLogFrame();
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				frame.setTitle("Bolsa");
+				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				frame.jTextArea1.append("Hello! I'm the Bolsa Service" + "\n");
+				frame.setSize(300, 300);
+				frame.setVisible(true);
+			}
+		});
 		this.ListaBolsa = loadBolsa();
 	}
 

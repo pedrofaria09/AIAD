@@ -24,9 +24,9 @@ public class Cotacao {
 		return this.date;
 	}
 	
-	public void imprime() {
+	public String imprime() {
 		SimpleDateFormat ft = new SimpleDateFormat ("H:mm:ss d/M/y");
-		System.out.println(" Cotacao: "+this.cotacao + " - Data: " + ft.format(this.date));
+		return "Cotacao: "+this.cotacao + " - Data: " + ft.format(this.date) + "\n";
 	}
 
 }

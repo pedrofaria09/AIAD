@@ -1,6 +1,7 @@
 package App;
 
 import java.text.SimpleDateFormat;
+import java.util.LinkedList;
 
 public class Acao {
 	private String NomeAgente;
@@ -43,9 +44,11 @@ public class Acao {
 		return valor;
 	}
 
-	public void imprime() {
-		System.out.print("Nome Agente: "+this.NomeAgente + " - Nome Bolsa: " + this.NomeBolsa + " - Valor: "+this.valor);
-		this.cotacao.imprime();
+	public LinkedList<String> imprime() {
+		LinkedList<String> l = new LinkedList<String>();
+		l.add("Nome Agente: "+this.NomeAgente + " - Nome Bolsa: " + this.NomeBolsa + " - Valor: "+this.valor + "\n");
+		l.add(this.cotacao.imprime());
+		return l;
 	}
 
 }

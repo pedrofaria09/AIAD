@@ -1,6 +1,7 @@
 package App;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Bolsa {
@@ -33,11 +34,13 @@ public class Bolsa {
 		return (100-(valorPrimeiro*100/valorUltimo));
 	}
 
-	public void imprime() {
+	public LinkedList<String> imprime() {
+		LinkedList<String> list = new LinkedList<String>();
 		SimpleDateFormat ft = new SimpleDateFormat ("H:mm:ss d/M/y");
-		System.out.println("Nome:"+this.nome);
+		list.add("Nome:"+this.nome);
 		for(Cotacao cot : this.ListVariacaoCotacao) {
-			System.out.println(" Cotacao: "+cot.getCotacao() + " Data: " + ft.format(cot.getData()));
+			list.add(" Cotacao: "+cot.getCotacao() + " Data: " + ft.format(cot.getData()));
 		}
+		return list;
 	}
 }
