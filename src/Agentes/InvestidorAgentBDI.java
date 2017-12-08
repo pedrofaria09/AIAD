@@ -63,7 +63,7 @@ public class InvestidorAgentBDI{
 	private boolean isRandomAgent;
 	private AgentLogFrame frame;
 	private int goalActionsNumber;
-	
+	private boolean soldAll;
 	@Agent
 	protected BDIAgent agent;
 	
@@ -83,7 +83,7 @@ public class InvestidorAgentBDI{
 			public void run() {
 				frame.setTitle(nome);
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				frame.jTextArea1.append("Hello! I'm Agent " + nome + "\n");
+				frame.jTextArea1.append("Hello! I'm " + nome + " and i have to sell at least " + goalActionsNumber +" actions\n");
 				frame.setSize(300, 300);
 				frame.setVisible(true);
 			}
@@ -131,13 +131,14 @@ public class InvestidorAgentBDI{
 		this.ListAcoesAtuais = new ArrayList<Acao>();
 		this.ListAcoesVendidas = new ArrayList<Acao>();
 		this.ListASeguir = new ArrayList<InvestidorAgentBDI>();
+		this.soldAll = false;
 		
 		agent.dispatchTopLevelGoal(new AGoalActionsNumber(this.goalActionsNumber));	
 	}
 	
 	@Plan(trigger=@Trigger(goals=AGoalActionsNumber.class))
 	public void getValoresABolsa(IPlan plan) {
-		while(this.goalActionsNumber > 0) {
+		while(!this.soldAll) {
 			plan.waitFor(timeToAskBolsa).get();
 			BolsaService bolsa = SServiceProvider.getService(agent.getServiceProvider(), BolsaService.class, RequiredServiceInfo.SCOPE_PLATFORM).get();
 			
@@ -145,8 +146,7 @@ public class InvestidorAgentBDI{
 		}
 		
 		imprime();
-		System.out.println("["+this.nome+"] - Acabei vendendo o número de ações desejadas");
-		
+		frame.jTextArea1.append("*** Acabei vendendo o número de ações desejadas - Valor em conta: " + this.cash + " ***");
 	}
 
 	
@@ -176,11 +176,14 @@ public class InvestidorAgentBDI{
 				Acao acao = this.ListAcoesAtuais.get(i);
 				valor = getPercetWithAtualCotacao(acao);
 				if(valor >= percentToSell) {
-					frame.jTextArea1.append("VOU VENDER :" + acao.getNomeBolsa() + " a uma %: " + valor + "\n");
+					frame.jTextArea1.append("VOU VENDER: " + acao.getNomeBolsa() + " a uma %: " + valor + "\n");
 					sellAction(acao);
 					this.ListAcoesAtuais.remove(acao);
 					i--;
 					this.goalActionsNumber--;
+					if(this.goalActionsNumber <= 0 && this.ListAcoesAtuais.isEmpty()) {
+						this.soldAll = true;
+					}
 				}
 			}
 		}
@@ -197,11 +200,15 @@ public class InvestidorAgentBDI{
 				int FlagUpdate = ThreadLocalRandom.current().nextInt(0, 2);
 				
 				if(FlagUpdate == 1) {
-					frame.jTextArea1.append("VOU VENDER :" + acao.getNomeBolsa() + " a uma %: " + valor + "\n");
+					valor = getPercetWithAtualCotacao(acao);
+					frame.jTextArea1.append("VOU VENDER: " + acao.getNomeBolsa() + " a uma %: " + valor + "\n");
 					sellAction(acao);
 					this.ListAcoesAtuais.remove(acao);
 					i--;
 					this.goalActionsNumber--;
+					if(this.goalActionsNumber <= 0 && this.ListAcoesAtuais.isEmpty()) {
+						this.soldAll = true;
+					}
 				}
 			}
 		}

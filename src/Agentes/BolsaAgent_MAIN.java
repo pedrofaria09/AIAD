@@ -50,15 +50,11 @@ public class BolsaAgent_MAIN {
         randomArgs.put("numberOfCotacoesToCheck", 3);
         randomArgs.put("timeToAskBolsa", 6950);
         randomArgs.put("isRandomAgent", true);
-        randomArgs.put("goalActionsNumber", 3);
+        randomArgs.put("goalActionsNumber", 10);
         
         CreationInfo investidorArriscadoInfo = new CreationInfo(arriscadoArgs);
         CreationInfo investidorCautelosoInfo = new CreationInfo(cautelosoArgs);
         CreationInfo investidorRandomInfo = new CreationInfo(randomArgs);
-
-		CreationInfo investidorArriscadoInfo = new CreationInfo(arriscadoArgs);
-		CreationInfo investidorCautelosoInfo = new CreationInfo(cautelosoArgs);
-		CreationInfo investidorRandomInfo = new CreationInfo(randomArgs);
 
 		final ThreadSuspendable sus = new ThreadSuspendable();
 		final IExternalAccess platform = Starter.createPlatform(new String[0]).get(sus);
