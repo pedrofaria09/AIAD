@@ -33,6 +33,7 @@ public class BolsaAgent_MAIN {
         arriscadoArgs.put("numberOfCotacoesToCheck", 3);
         arriscadoArgs.put("timeToAskBolsa", 7050);
         arriscadoArgs.put("isRandomAgent", false);
+        arriscadoArgs.put("goalActionsNumber", 5);
         
 		//Agente Cauteloso
         Map<String, Object> cautelosoArgs = new HashMap<String, Object>();
@@ -42,7 +43,8 @@ public class BolsaAgent_MAIN {
         cautelosoArgs.put("percentToSell", 5);
         cautelosoArgs.put("numberOfCotacoesToCheck", 3);
         cautelosoArgs.put("timeToAskBolsa", 7000);
-        cautelosoArgs.put("isRandomAgent", false);   
+        cautelosoArgs.put("isRandomAgent", false);
+        cautelosoArgs.put("goalActionsNumber", 4);
         
 		//Agente Random
         Map<String, Object> randomArgs = new HashMap<String, Object>();
@@ -50,7 +52,8 @@ public class BolsaAgent_MAIN {
         randomArgs.put("valueToBuyAction", 2000);
         randomArgs.put("numberOfCotacoesToCheck", 3);
         randomArgs.put("timeToAskBolsa", 6950);
-        randomArgs.put("isRandomAgent", true);   
+        randomArgs.put("isRandomAgent", true);
+        randomArgs.put("goalActionsNumber", 3);
         
         CreationInfo investidorArriscadoInfo = new CreationInfo(arriscadoArgs);
         CreationInfo investidorCautelosoInfo = new CreationInfo(cautelosoArgs);
