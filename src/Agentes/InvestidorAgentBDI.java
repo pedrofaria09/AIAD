@@ -160,7 +160,7 @@ public class InvestidorAgentBDI implements IFollowService {
 	}
 	
 	public void checkForNewAgentsToFollow() {		
-		follow = new Following(this, 100000);
+		follow = new Following(this, 90000);
 		SServiceProvider.getServices(agent.getServiceProvider(), IFollowService.class, RequiredServiceInfo.SCOPE_PLATFORM).addResultListener(new IntermediateDefaultResultListener<IFollowService>() {
 			public void intermediateResultAvailable(IFollowService is) {
 				is.checkToFollow(follow.clone());
@@ -215,16 +215,6 @@ public class InvestidorAgentBDI implements IFollowService {
 		if(this.listFollowing.contains(agente)) {
 			this.listFollowing.remove(agente);
 		}
-	}
-	
-	public boolean containsName(List<InvestidorAgentBDI> list, String name){
-	    for(InvestidorAgentBDI agent : list) {
-	    	if(agent.getNome().equals(name)) {
-	    		System.out.println("ContainsName");
-	    		return true;
-	    	}
-	    }
-	    return false;
 	}
 
 	@Plan(trigger = @Trigger(factchangeds = "valoresBolsa"))
@@ -298,6 +288,7 @@ public class InvestidorAgentBDI implements IFollowService {
 		Bolsa bolsa = null;
 		Cotacao lastCotacao = null;
 		Acao acaoAtual = null;
+		double lucroToMe, lucroToTheOtherAgent, valorAretirar = 0;
 
 		for (Bolsa bol : getValoresBolsa()) {
 			if (bol.getNome().equals(acao.getNomeBolsa()))
@@ -306,15 +297,42 @@ public class InvestidorAgentBDI implements IFollowService {
 		lastCotacao = bolsa.getListVariacaoCotacao().get(bolsa.getListVariacaoCotacao().size() - 1);
 
 		double taxa = valor*0.01;
-		double valorAretirar = acao.getValorDeCompra() + (acao.getValorDeCompra() * taxa);
+		double lucro = (acao.getValorDeCompra() * taxa);
+		
+		if(ac.getAgenteSugeriu() != null && lucro > 0) {
+			lucroToMe = lucro * (2/3);
+			lucroToTheOtherAgent = lucro - lucroToMe;
+			
+			ac.getAgenteSugeriu().giveMoney(this.nome, lucroToTheOtherAgent);
+			lucro = lucroToMe;
+			
+			valorAretirar = acao.getValorDeCompra() + lucro;
+			acaoAtual = new Acao(getNome(), bolsa.getNome(), lastCotacao, valorAretirar, ac.getAgenteSugeriu());
+		} else {
+			valorAretirar = acao.getValorDeCompra() + lucro;
+			acaoAtual = new Acao(getNome(), bolsa.getNome(), lastCotacao, valorAretirar);
+		}
+		
 		valorAretirar = Auxiliar.round(valorAretirar, 2);
-		acaoAtual = new Acao(getNome(), bolsa.getNome(), lastCotacao, valorAretirar);
+		
 		addListAcoesVendidas(acaoAtual);
 		addCash(valorAretirar);
 
 		//TODO maybe change this to a Trigger????
 		frame.jTextArea1.append("Vendi a acao:" + acao.getNomeBolsa() + " com uma cotacao de: " + lastCotacao.getCotacao() + " com um valor de: " + valorAretirar + "\n");
 		frame.jTextArea1.append("Valor em conta: " + getCash() + "\n");
+		
+		//Se a acao vendida, corresponder a uma acao que foi comprada por sugestão de um agente
+		if(ac.getAgenteSugeriu() != null) {			
+			frame.jTextArea1.append("Acao sugerida por: "+ac.getAgenteSugeriu().getNome() +"\n");
+		}		
+	}
+
+	//Método que recebe o lucro recebido de um follower
+	private void giveMoney(String agentName, double lucroToTheOtherAgent) {
+		this.addCash(lucroToTheOtherAgent);
+		
+		frame.jTextArea1.append("Recebi do agente : "+ agentName +" o seguinte lucro: "+ lucroToTheOtherAgent + "\n");
 	}
 
 	private double getPercetWithAtualCotacao(Acao ac) {
@@ -378,26 +396,26 @@ public class InvestidorAgentBDI implements IFollowService {
 	
 	private void tellFollowersToBuy(Acao acao) {
 		for(InvestidorAgentBDI agent : this.listFollowers) {
-			agent.buyThisAction(this.nome, acao);
+			agent.buyThisAction(this, acao);
 		}
 	}
 	
 	//Agente é informado por quem está a seguir de uma ação para comprar
-	private boolean buyThisAction(String nomeAgente, Acao acao) {
+	private boolean buyThisAction(InvestidorAgentBDI agent, Acao acao) {
 		if(!checkIfDontHaveAction(acao.getNomeBolsa())) {
 			String text = "";
-			text += "O agente " +nomeAgente+ " disse para comprar a acao "+ acao.getNomeBolsa() +", mas já a tenho.\n";
+			text += "O agente " +agent.getNome()+ " disse para comprar a acao "+ acao.getNomeBolsa() +", mas já a tenho.\n";
 			frame.jTextArea1.append(text);
 			return false;
 		}		
 		
 		if(this.cash > acao.getValorDeCompra()) {
-			Acao nAcao = new Acao(getNome(), acao.getNomeBolsa(), acao.getCotacao(), acao.getValorDeCompra());
+			Acao nAcao = new Acao(getNome(), acao.getNomeBolsa(), acao.getCotacao(), acao.getValorDeCompra(), agent);
 			this.addListAcoesCompradas(nAcao);
 			this.retCash(nAcao.getValorDeCompra());
 			
 			String text = "";
-			text += "Vou comprar a ação que o " +nomeAgente+ " comprou:\n";
+			text += "Vou comprar a ação que o " +agent.getNome()+ " comprou:\n";
 			text += "Comprei a acao: " + nAcao.getNomeBolsa() + " com uma cotacao de: " + nAcao.getCotacao().getCotacao() + " gastando " + nAcao.getValorDeCompra() + "\n";
 			text += "Valor em conta: " + getCash() + "\n";
 			
@@ -405,7 +423,7 @@ public class InvestidorAgentBDI implements IFollowService {
 			return true;
 		} else {
 			String text = "";
-			text += "Ia a ação "+acao.getNomeBolsa() + " que o " +nomeAgente+ " comprou, mas não tenho dinheiro.\n";
+			text += "Ia a ação "+acao.getNomeBolsa() + " que o " +agent.getNome()+ " comprou, mas não tenho dinheiro.\n";
 			frame.jTextArea1.append(text);
 			return false;
 		}
