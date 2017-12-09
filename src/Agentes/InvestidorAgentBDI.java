@@ -27,6 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
 		@Argument(name = "percentToBuy", clazz = int.class, defaultvalue = "-1"),
 		@Argument(name = "percentToSell", clazz = int.class, defaultvalue = "-1"),
 		@Argument(name = "percentMinToSellAndLoose", clazz = int.class, defaultvalue = "-1"),
+		@Argument(name = "percentMinToFollow", clazz = int.class, defaultvalue = "-1"),
 		@Argument(name = "numberOfCotacoesToCheck", clazz = int.class, defaultvalue = "1"),
 		@Argument(name = "isRandomAgent", clazz = boolean.class, defaultvalue = "false"),
 		@Argument(name = "timeToAskBolsa", clazz = int.class, defaultvalue = "-1"),
@@ -50,11 +51,14 @@ public class InvestidorAgentBDI implements IFollowService {
 	private int percentToBuy;
 	private int percentToSell;
 	private int percentMinToSellAndLoose;
+	private int percentMinToFollow;
+	private int valueToFollow;
 	private int numberOfCotacoesToCheck;
 	private boolean isRandomAgent;
 	private AgentLogFrame frame;
 	private int goalActionsNumber;
 	private boolean soldAll;
+	
 	
 	private List<InvestidorAgentBDI> listFollowing;	//Quem estou a seguir
 	private List<InvestidorAgentBDI> listFollowers;	//Os meus seguidores
@@ -68,6 +72,7 @@ public class InvestidorAgentBDI implements IFollowService {
 		this.percentToBuy = (int) agent.getArgument("percentToBuy");
 		this.percentToSell = (int) agent.getArgument("percentToSell");
 		this.percentMinToSellAndLoose = - (int) agent.getArgument("percentMinToSellAndLoose");
+		this.percentMinToFollow = (int) agent.getArgument("percentMinToFollow");
 		this.numberOfCotacoesToCheck = (int) agent.getArgument("numberOfCotacoesToCheck");
 		this.isRandomAgent = (boolean) agent.getArgument("isRandomAgent");
 		this.timeToAskBolsa = (int) agent.getArgument("timeToAskBolsa");
@@ -118,7 +123,8 @@ public class InvestidorAgentBDI implements IFollowService {
 		this.listFollowing = new ArrayList<InvestidorAgentBDI>();
 		this.listFollowers = new ArrayList<InvestidorAgentBDI>();
 		this.soldAll = false;
-
+		this.valueToFollow = (int) (getCash() + (getCash()*(percentMinToFollow*0.01)));
+		
 		agent.dispatchTopLevelGoal(new AGoalActionsNumber(this.goalActionsNumber));
 	}
 
@@ -159,8 +165,8 @@ public class InvestidorAgentBDI implements IFollowService {
 		frame.jTextArea1.append(text);
 	}
 	
-	public void checkForNewAgentsToFollow() {		
-		follow = new Following(this, 100000);
+	public void checkForNewAgentsToFollow() {
+		follow = new Following(this, this.valueToFollow);
 		SServiceProvider.getServices(agent.getServiceProvider(), IFollowService.class, RequiredServiceInfo.SCOPE_PLATFORM).addResultListener(new IntermediateDefaultResultListener<IFollowService>() {
 			public void intermediateResultAvailable(IFollowService is) {
 				is.checkToFollow(follow.clone());
@@ -382,11 +388,11 @@ public class InvestidorAgentBDI implements IFollowService {
 		}
 	}
 	
-	//Agente é informado por quem está a seguir de uma ação para comprar
+	//Agente ï¿½ informado por quem estï¿½ a seguir de uma aï¿½ï¿½o para comprar
 	private boolean buyThisAction(String nomeAgente, Acao acao) {
 		if(!checkIfDontHaveAction(acao.getNomeBolsa())) {
 			String text = "";
-			text += "O agente " +nomeAgente+ " disse para comprar a acao "+ acao.getNomeBolsa() +", mas já a tenho.\n";
+			text += "O agente " +nomeAgente+ " disse para comprar a acao "+ acao.getNomeBolsa() +", mas jï¿½ a tenho.\n";
 			frame.jTextArea1.append(text);
 			return false;
 		}		
@@ -397,7 +403,7 @@ public class InvestidorAgentBDI implements IFollowService {
 			this.retCash(nAcao.getValorDeCompra());
 			
 			String text = "";
-			text += "Vou comprar a ação que o " +nomeAgente+ " comprou:\n";
+			text += "Vou comprar a aï¿½ï¿½o que o " +nomeAgente+ " comprou:\n";
 			text += "Comprei a acao: " + nAcao.getNomeBolsa() + " com uma cotacao de: " + nAcao.getCotacao().getCotacao() + " gastando " + nAcao.getValorDeCompra() + "\n";
 			text += "Valor em conta: " + getCash() + "\n";
 			
@@ -405,7 +411,7 @@ public class InvestidorAgentBDI implements IFollowService {
 			return true;
 		} else {
 			String text = "";
-			text += "Ia a ação "+acao.getNomeBolsa() + " que o " +nomeAgente+ " comprou, mas não tenho dinheiro.\n";
+			text += "Ia a aï¿½ï¿½o "+acao.getNomeBolsa() + " que o " +nomeAgente+ " comprou, mas nï¿½o tenho dinheiro.\n";
 			frame.jTextArea1.append(text);
 			return false;
 		}
