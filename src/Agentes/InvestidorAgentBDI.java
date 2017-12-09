@@ -127,7 +127,7 @@ public class InvestidorAgentBDI {
 		}
 
 		imprime();
-		frame.jTextArea1.append("*** Acabei vendendo o nÃºmero de aÃ§Ãµes desejadas - Valor em conta: " + this.cash + " ***");
+		frame.jTextArea1.append("*** Acabei vendendo o numero de acoes desejadas - Valor em conta: " + this.cash + " ***");
 	}
 	
 	public void checkForNewAgentsToFollow() {
@@ -135,7 +135,7 @@ public class InvestidorAgentBDI {
 		chatservices.addResultListener(new DefaultResultListener<Collection<IFollowService>>() {	
 			public void resultAvailable(Collection<IFollowService> result) {				
 				for(IFollowService cs : result) {
-					//Para já ele envia 100.000, mas dps isto passa a uma variável do agente
+					//Para jï¿½ ele envia 100.000, mas dps isto passa a uma variï¿½vel do agente
 					String agentToFollow = cs.niceToFollow(agent.getComponentIdentifier().getLocalName(), 100000);
 					String agentToUnFollow = cs.notNiceToFollow(agent.getComponentIdentifier().getLocalName(), 100000);
 					
@@ -163,7 +163,7 @@ public class InvestidorAgentBDI {
 					}
 					text += "\n==============================================\n\n";
 				} else {
-					text +="\nNeste momento não estou a seguir ninguém\n";
+					text +="\nNeste momento nao estou a seguir ninguem\n";
 				}
 				
 				frame.jTextArea1.append(text);
@@ -195,6 +195,7 @@ public class InvestidorAgentBDI {
 			for (int i = 0; i < this.ListAcoesAtuais.size(); i++) {
 				Acao acao = this.ListAcoesAtuais.get(i);
 				valor = getPercetWithAtualCotacao(acao);
+				valor = Auxiliar.round(valor,2);
 				if (valor >= percentToSell) {
 					frame.jTextArea1.append("VOU VENDER: " + acao.getNomeBolsa() + " a uma %: " + valor + "\n");
 					sellAction(acao);
@@ -221,6 +222,7 @@ public class InvestidorAgentBDI {
 
 				if (FlagUpdate == 1) {
 					valor = getPercetWithAtualCotacao(acao);
+					valor = Auxiliar.round(valor,2);
 					frame.jTextArea1.append("VOU VENDER: " + acao.getNomeBolsa() + " a uma %: " + valor + "\n");
 					sellAction(acao);
 					this.ListAcoesAtuais.remove(acao);

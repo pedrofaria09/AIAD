@@ -43,7 +43,7 @@ public class BolsaAgentBDI implements BolsaService {
 			public void run() {
 				frame.setTitle("Bolsa");
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				frame.jTextArea1.append("Hello! I'm the Bolsa Service" + "\n");
+				frame.jTextArea1.append("Hello! I'm the Bolsa Service \n");
 				frame.setSize(300, 300);
 				frame.setVisible(true);
 			}
@@ -64,7 +64,8 @@ public class BolsaAgentBDI implements BolsaService {
 		while(true) {
 			updateBolsa();
 			plan.waitFor(TIMEBOLSA).get();
-			//System.out.println("Bolsa Atualizada");
+			frame.jTextArea1.append("Bolsa Atualizada \n");
+			imprimeBolsa2();
 		}
 	}
 	/*
@@ -199,6 +200,21 @@ public class BolsaAgentBDI implements BolsaService {
 	public void imprimeBolsa() {
 		for(Bolsa bol: this.ListaBolsa) {
 			bol.imprime();
+		}
+	}
+	
+	public void imprimeBolsa2() {
+		String name;
+		Double ultimaCotacao;
+		Double penultimaCotacao;
+		Double percentagem;
+		for(Bolsa bol: this.ListaBolsa) {
+			name = bol.getNome();
+			ultimaCotacao = bol.getListVariacaoCotacao().get(bol.getListVariacaoCotacao().size()-1).getCotacao();
+			penultimaCotacao = bol.getListVariacaoCotacao().get(bol.getListVariacaoCotacao().size()-2).getCotacao();
+			percentagem = (100-(ultimaCotacao*100/penultimaCotacao));
+			percentagem = Auxiliar.round(percentagem,2);
+			frame.jTextArea1.append(name + " - Variação: " + ultimaCotacao + " - > " + penultimaCotacao + " Percentagem: " + percentagem + "%\n");
 		}
 	}
 
