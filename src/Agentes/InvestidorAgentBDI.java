@@ -11,14 +11,11 @@ import jadex.bdiv3.runtime.IPlan;
 import jadex.bridge.service.RequiredServiceInfo;
 import jadex.bridge.service.annotation.Service;
 import jadex.bridge.service.search.SServiceProvider;
-import jadex.commons.future.DefaultResultListener;
-import jadex.commons.future.IFuture;
 import jadex.commons.future.IntermediateDefaultResultListener;
 import jadex.micro.annotation.*;
 
 import javax.swing.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -184,15 +181,12 @@ public class InvestidorAgentBDI implements IFollowService {
 		
 		//Este agente serve para ele
 		if(this.getCash() >= f.getValueToFollow()) {
-			
 			if(!this.listFollowers.contains(f.getAgent())) {
 				this.listFollowers.add(f.getAgent());
 			
 				f.getAgent().tellIsFollowing(this);
 			}		
-			
 		} 	
-		
 	}
 	
 	public void checkToNotFollow(Following f) {	
@@ -204,8 +198,9 @@ public class InvestidorAgentBDI implements IFollowService {
 		//Este agente serve para ele
 		if(this.getCash() < f.getValueToFollow()) {
 			if(this.listFollowers.contains(f.getAgent())) {
-				boolean result = this.listFollowers.remove(f.getAgent());				
-				f.getAgent().tellIsNotFollowing(this);
+				this.listFollowers.remove(f.getAgent());
+				
+				f.getAgent().tellIsNotFollowing(this);				
 			}
 		} 		
 	}
@@ -218,7 +213,7 @@ public class InvestidorAgentBDI implements IFollowService {
 	
 	public void tellIsNotFollowing(InvestidorAgentBDI agente) {
 		if(this.listFollowing.contains(agente)) {
-			boolean result = this.listFollowing.remove(agente);
+			this.listFollowing.remove(agente);
 		}
 	}
 	
@@ -378,6 +373,42 @@ public class InvestidorAgentBDI implements IFollowService {
 		frame.jTextArea1.append("Comprei a acao: " + bolsa.getNome() + " com uma cotacao de: " + lastCotacao.getCotacao() + " gastando " + valueToBuyAction + "\n");
 		frame.jTextArea1.append("Valor em conta: " + getCash() + "\n");
 
+		tellFollowersToBuy(acao);
+	}
+	
+	private void tellFollowersToBuy(Acao acao) {
+		for(InvestidorAgentBDI agent : this.listFollowers) {
+			agent.buyThisAction(this.nome, acao);
+		}
+	}
+	
+	//Agente é informado por quem está a seguir de uma ação para comprar
+	private boolean buyThisAction(String nomeAgente, Acao acao) {
+		if(!checkIfDontHaveAction(acao.getNomeBolsa())) {
+			String text = "";
+			text += "O agente " +nomeAgente+ " disse para comprar a acao "+ acao.getNomeBolsa() +", mas já a tenho.\n";
+			frame.jTextArea1.append(text);
+			return false;
+		}		
+		
+		if(this.cash > acao.getValorDeCompra()) {
+			Acao nAcao = new Acao(getNome(), acao.getNomeBolsa(), acao.getCotacao(), acao.getValorDeCompra());
+			this.addListAcoesCompradas(nAcao);
+			this.retCash(nAcao.getValorDeCompra());
+			
+			String text = "";
+			text += "Vou comprar a ação que o " +nomeAgente+ " comprou:\n";
+			text += "Comprei a acao: " + nAcao.getNomeBolsa() + " com uma cotacao de: " + nAcao.getCotacao().getCotacao() + " gastando " + nAcao.getValorDeCompra() + "\n";
+			text += "Valor em conta: " + getCash() + "\n";
+			
+			frame.jTextArea1.append(text);
+			return true;
+		} else {
+			String text = "";
+			text += "Ia a ação "+acao.getNomeBolsa() + " que o " +nomeAgente+ " comprou, mas não tenho dinheiro.\n";
+			frame.jTextArea1.append(text);
+			return false;
+		}
 	}
 
 	private boolean checkIfDontHaveAction(String nome) {
