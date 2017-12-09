@@ -26,9 +26,10 @@ import java.util.concurrent.ThreadLocalRandom;
 		@Argument(name = "nome", clazz = String.class, defaultvalue = "N/A"),
 		@Argument(name = "valueToBuyAction", clazz = int.class, defaultvalue = "-1"),
 		@Argument(name = "percentToBuy", clazz = int.class, defaultvalue = "-1"),
+		@Argument(name = "percentToSell", clazz = int.class, defaultvalue = "-1"),
+		@Argument(name = "percentMinToSellAndLoose", clazz = int.class, defaultvalue = "-1"),
 		@Argument(name = "numberOfCotacoesToCheck", clazz = int.class, defaultvalue = "1"),
 		@Argument(name = "isRandomAgent", clazz = boolean.class, defaultvalue = "false"),
-		@Argument(name = "percentToSell", clazz = int.class, defaultvalue = "-1"),
 		@Argument(name = "timeToAskBolsa", clazz = int.class, defaultvalue = "-1"),
 		@Argument(name = "goalActionsNumber", clazz = int.class, defaultvalue = "-1")
 })
@@ -48,9 +49,10 @@ public class InvestidorAgentBDI {
 	private double cash = 100000;
 	private int timeToAskBolsa;
 	private int valueToBuyAction;
-	private int percentToBuy; //5% of variation of the action
+	private int percentToBuy;
 	private int percentToSell;
-	private int numberOfCotacoesToCheck; // will check the last 3 actions to buy.
+	private int percentMinToSellAndLoose;
+	private int numberOfCotacoesToCheck;
 	private boolean isRandomAgent;
 	private AgentLogFrame frame;
 	private int goalActionsNumber;
@@ -62,6 +64,7 @@ public class InvestidorAgentBDI {
 		this.valueToBuyAction = (int) agent.getArgument("valueToBuyAction");
 		this.percentToBuy = (int) agent.getArgument("percentToBuy");
 		this.percentToSell = (int) agent.getArgument("percentToSell");
+		this.percentMinToSellAndLoose = - (int) agent.getArgument("percentMinToSellAndLoose");
 		this.numberOfCotacoesToCheck = (int) agent.getArgument("numberOfCotacoesToCheck");
 		this.isRandomAgent = (boolean) agent.getArgument("isRandomAgent");
 		this.timeToAskBolsa = (int) agent.getArgument("timeToAskBolsa");
@@ -127,7 +130,7 @@ public class InvestidorAgentBDI {
 		}
 
 		imprime();
-		frame.jTextArea1.append("*** Acabei vendendo o numero de acoes desejadas - Valor em conta: " + this.cash + " ***");
+		frame.jTextArea1.append("*** Acabei vendendo o numero de acoes desejadas - Valor em conta: " + this.cash + " *** \n");
 	}
 	
 	public void checkForNewAgentsToFollow() {
@@ -196,7 +199,7 @@ public class InvestidorAgentBDI {
 				Acao acao = this.ListAcoesAtuais.get(i);
 				valor = getPercetWithAtualCotacao(acao);
 				valor = Auxiliar.round(valor,2);
-				if (valor >= percentToSell) {
+				if (valor >= percentToSell || valor <= percentMinToSellAndLoose) {
 					frame.jTextArea1.append("VOU VENDER: " + acao.getNomeBolsa() + " a uma %: " + valor + "\n");
 					sellAction(acao);
 					this.ListAcoesAtuais.remove(acao);

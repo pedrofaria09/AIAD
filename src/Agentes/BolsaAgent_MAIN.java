@@ -27,6 +27,7 @@ public class BolsaAgent_MAIN {
         arriscadoArgs.put("valueToBuyAction", 3000);
         arriscadoArgs.put("percentToBuy", 5);
         arriscadoArgs.put("percentToSell", 10);
+        arriscadoArgs.put("percentMinToSellAndLoose", 2);
         arriscadoArgs.put("numberOfCotacoesToCheck", 3);
         arriscadoArgs.put("timeToAskBolsa", 7050);
         arriscadoArgs.put("isRandomAgent", false);
@@ -38,6 +39,7 @@ public class BolsaAgent_MAIN {
         cautelosoArgs.put("valueToBuyAction", 2000);
         cautelosoArgs.put("percentToBuy", 7);
         cautelosoArgs.put("percentToSell", 5);
+        cautelosoArgs.put("percentMinToSellAndLoose", 2);
         cautelosoArgs.put("numberOfCotacoesToCheck", 3);
         cautelosoArgs.put("timeToAskBolsa", 7000);
         cautelosoArgs.put("isRandomAgent", false);
