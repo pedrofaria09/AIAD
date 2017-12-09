@@ -31,7 +31,7 @@ public class Bolsa {
 		int primeiro = ultimo + 1 - number;
 		double valorPrimeiro = getListVariacaoCotacao().get(primeiro).getCotacao();
 		
-		return (100-(valorPrimeiro*100/valorUltimo));
+		return (100-((valorPrimeiro*100)/valorUltimo));
 	}
 
 	public LinkedList<String> imprime() {

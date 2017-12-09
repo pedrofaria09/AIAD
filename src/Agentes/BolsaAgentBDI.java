@@ -212,7 +212,7 @@ public class BolsaAgentBDI implements BolsaService {
 			name = bol.getNome();
 			ultimaCotacao = bol.getListVariacaoCotacao().get(bol.getListVariacaoCotacao().size()-1).getCotacao();
 			penultimaCotacao = bol.getListVariacaoCotacao().get(bol.getListVariacaoCotacao().size()-2).getCotacao();
-			percentagem = (100-(ultimaCotacao*100/penultimaCotacao));
+			percentagem = (100-((ultimaCotacao*100)/penultimaCotacao));
 			percentagem = Auxiliar.round(percentagem,2);
 			frame.jTextArea1.append(name + " - Variação: " + ultimaCotacao + " - > " + penultimaCotacao + " Percentagem: " + percentagem + "%\n");
 		}
