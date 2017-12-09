@@ -2,8 +2,12 @@ package Agentes;
 
 public interface IFollowService {
 
-	public String niceToFollow(String agentName, int valueToFollow);
+	//public InvestidorAgentBDI niceToFollow(String agentName, int valueToFollow);
 	
-	public String notNiceToFollow(String agentName, int valueToFollow);
+	//public InvestidorAgentBDI notNiceToFollow(String agentName, int valueToFollow);
+	
+	public void checkToFollow(Following f);
+	
+	public void checkToNotFollow(Following f);
 	
 }

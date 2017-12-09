@@ -9,9 +9,11 @@ import jadex.bdiv3.BDIAgent;
 import jadex.bdiv3.annotation.*;
 import jadex.bdiv3.runtime.IPlan;
 import jadex.bridge.service.RequiredServiceInfo;
+import jadex.bridge.service.annotation.Service;
 import jadex.bridge.service.search.SServiceProvider;
 import jadex.commons.future.DefaultResultListener;
 import jadex.commons.future.IFuture;
+import jadex.commons.future.IntermediateDefaultResultListener;
 import jadex.micro.annotation.*;
 
 import javax.swing.*;
@@ -32,18 +34,17 @@ import java.util.concurrent.ThreadLocalRandom;
 		@Argument(name = "timeToAskBolsa", clazz = int.class, defaultvalue = "-1"),
 		@Argument(name = "goalActionsNumber", clazz = int.class, defaultvalue = "-1")
 })
+@Service
 @Description("This agent buys and sells actions")
-@ProvidedServices(@ProvidedService(type=IFollowService.class, implementation=@Implementation(FollowService.class)))
+@ProvidedServices(@ProvidedService(type=IFollowService.class))
 @RequiredServices(@RequiredService(name="chatservices", type=IFollowService.class, binding=@Binding(scope=Binding.SCOPE_PLATFORM)))
-public class InvestidorAgentBDI {
+public class InvestidorAgentBDI implements IFollowService {
 	@Agent
 	protected BDIAgent agent;
-	private List<Acao> ListAcoesCompradas;
-	private List<Acao> ListAcoesAtuais;
-	private List<Acao> ListAcoesVendidas;
-	private List<InvestidorAgentBDI> ListASeguir;
+	private List<Acao> listAcoesCompradas;
+	private List<Acao> listAcoesAtuais;
+	private List<Acao> listAcoesVendidas;
 	private List<Bolsa> valoresBolsa;
-	private List<String> agentsFollowing;
 	private String nome;
 	private double cash = 100000;
 	private int timeToAskBolsa;
@@ -55,7 +56,12 @@ public class InvestidorAgentBDI {
 	private AgentLogFrame frame;
 	private int goalActionsNumber;
 	private boolean soldAll;
-
+	
+	private List<InvestidorAgentBDI> listFollowing;	//Quem estou a seguir
+	private List<InvestidorAgentBDI> listFollowers;	//Os meus seguidores
+	
+	protected Following follow;
+	
 	@AgentCreated
 	public void init() {
 		this.nome = (String) agent.getArgument("nome");
@@ -91,27 +97,27 @@ public class InvestidorAgentBDI {
 	}
 
 	public List<Acao> getListAcoesCompradas() {
-		return this.ListAcoesCompradas;
+		return this.listAcoesCompradas;
 	}
 
 	public List<Acao> getListAcoesAtuais() {
-		return this.ListAcoesAtuais;
+		return this.listAcoesAtuais;
 	}
 
 	public void addListAcoesCompradas(Acao acao) {
-		this.ListAcoesCompradas.add(acao);
-		this.ListAcoesAtuais.add(acao);
+		this.listAcoesCompradas.add(acao);
+		this.listAcoesAtuais.add(acao);
 	}
 
 	@AgentBody
 	public void body() {
 		this.valoresBolsa = new ArrayList<Bolsa>();
-		this.ListAcoesCompradas = new ArrayList<Acao>();
-		this.ListAcoesAtuais = new ArrayList<Acao>();
-		this.ListAcoesVendidas = new ArrayList<Acao>();
-		this.ListASeguir = new ArrayList<InvestidorAgentBDI>();
+		this.listAcoesCompradas = new ArrayList<Acao>();
+		this.listAcoesAtuais = new ArrayList<Acao>();
+		this.listAcoesVendidas = new ArrayList<Acao>();
+		this.listFollowing = new ArrayList<InvestidorAgentBDI>();
+		this.listFollowers = new ArrayList<InvestidorAgentBDI>();
 		this.soldAll = false;
-		this.agentsFollowing = new ArrayList<String>();
 
 		agent.dispatchTopLevelGoal(new AGoalActionsNumber(this.goalActionsNumber));
 	}
@@ -124,51 +130,103 @@ public class InvestidorAgentBDI {
 
 			setValoresBolsa(bolsa.getValoresBolsa());
 			checkForNewAgentsToFollow();
+			printFollowersAndFollowing();
 		}
 
 		imprime();
 		frame.jTextArea1.append("*** Acabei vendendo o nÃºmero de aÃ§Ãµes desejadas - Valor em conta: " + this.cash + " ***");
 	}
 	
-	public void checkForNewAgentsToFollow() {
-		IFuture<Collection<IFollowService>> chatservices = agent.getServiceContainer().getRequiredServices("chatservices");
-		chatservices.addResultListener(new DefaultResultListener<Collection<IFollowService>>() {	
-			public void resultAvailable(Collection<IFollowService> result) {				
-				for(IFollowService cs : result) {
-					//Para já ele envia 100.000, mas dps isto passa a uma variável do agente
-					String agentToFollow = cs.niceToFollow(agent.getComponentIdentifier().getLocalName(), 100000);
-					String agentToUnFollow = cs.notNiceToFollow(agent.getComponentIdentifier().getLocalName(), 100000);
-					
-					if(agentToFollow != null && agentToFollow != nome) {
-						if(!agentsFollowing.contains(agentToFollow)) {
-							agentsFollowing.add(agentToFollow);
-						}						
-					}
-					
-					if(agentToUnFollow != null && agentToUnFollow != nome) {
-						if(agentsFollowing.contains(agentToUnFollow)) {
-							agentsFollowing.remove(agentToUnFollow);
-						}						
-					}
-					
-				}
-				
-				String text = "";
-				
-				if(!agentsFollowing.isEmpty()) {
-					text += "==============================================\n";
-					text += "Neste momento estou a seguir os agentes:\n";
-					for(String agente : agentsFollowing) {
-						text += "-" +agente;
-					}
-					text += "\n==============================================\n\n";
-				} else {
-					text +="\nNeste momento não estou a seguir ninguém\n";
-				}
-				
-				frame.jTextArea1.append(text);
-			}			
+	public void printFollowersAndFollowing() {
+		String text = "";
+		
+		//Seguidores
+		text += "\n=======================";
+		text += "\n Os meus seguidores: \n";
+		for(InvestidorAgentBDI agente : this.listFollowers) {
+			text += "- "+agente.getNome()+"\n";
+		}
+		text += "=======================\n";
+		
+		//A seguir
+		text += "\n=======================";
+		text += "\n Quem estou a seguir: \n";
+		for(InvestidorAgentBDI agente : this.listFollowing) {
+			text += "- "+agente.getNome()+"\n";
+		}
+		text += "=======================\n"; 
+		
+		frame.jTextArea1.append(text);
+	}
+	
+	public void checkForNewAgentsToFollow() {		
+		follow = new Following(this, 100000);
+		SServiceProvider.getServices(agent.getServiceProvider(), IFollowService.class, RequiredServiceInfo.SCOPE_PLATFORM).addResultListener(new IntermediateDefaultResultListener<IFollowService>() {
+			public void intermediateResultAvailable(IFollowService is) {
+				is.checkToFollow(follow.clone());
+				is.checkToNotFollow(follow.clone());
+			}
 		});
+	}
+	
+	/*Recebe um objecto Following que contém:
+	 * Agente que procura agentes para seguir
+	 * Valor que faz com que ele queira seguir um agente
+	*/
+	public void checkToFollow(Following f) {	
+		//Para não comunicar com ele próprio
+		if(f.getAgent().getNome() == this.nome) {
+			return;
+		}
+		
+		//Este agente serve para ele
+		if(this.getCash() >= f.getValueToFollow()) {
+			
+			if(!this.listFollowers.contains(f.getAgent())) {
+				this.listFollowers.add(f.getAgent());
+			
+				f.getAgent().tellIsFollowing(this);
+			}		
+			
+		} 	
+		
+	}
+	
+	public void checkToNotFollow(Following f) {	
+		//Para não comunicar com ele próprio
+		if(f.getAgent().getNome() == this.nome) {
+			return;
+		}
+		
+		//Este agente serve para ele
+		if(this.getCash() < f.getValueToFollow()) {
+			if(this.listFollowers.contains(f.getAgent())) {
+				boolean result = this.listFollowers.remove(f.getAgent());				
+				f.getAgent().tellIsNotFollowing(this);
+			}
+		} 		
+	}
+	
+	public void tellIsFollowing(InvestidorAgentBDI agente) {
+		if(!this.listFollowing.contains(agente)) {
+			this.listFollowing.add(agente);
+		}
+	}
+	
+	public void tellIsNotFollowing(InvestidorAgentBDI agente) {
+		if(this.listFollowing.contains(agente)) {
+			boolean result = this.listFollowing.remove(agente);
+		}
+	}
+	
+	public boolean containsName(List<InvestidorAgentBDI> list, String name){
+	    for(InvestidorAgentBDI agent : list) {
+	    	if(agent.getNome().equals(name)) {
+	    		System.out.println("ContainsName");
+	    		return true;
+	    	}
+	    }
+	    return false;
 	}
 
 	@Plan(trigger = @Trigger(factchangeds = "valoresBolsa"))
@@ -191,17 +249,17 @@ public class InvestidorAgentBDI {
 	private void checkSellActions() {
 		double valor = 0;
 
-		if (!this.ListAcoesAtuais.isEmpty()) {
-			for (int i = 0; i < this.ListAcoesAtuais.size(); i++) {
-				Acao acao = this.ListAcoesAtuais.get(i);
+		if (!this.listAcoesAtuais.isEmpty()) {
+			for (int i = 0; i < this.listAcoesAtuais.size(); i++) {
+				Acao acao = this.listAcoesAtuais.get(i);
 				valor = getPercetWithAtualCotacao(acao);
 				if (valor >= percentToSell) {
 					frame.jTextArea1.append("VOU VENDER: " + acao.getNomeBolsa() + " a uma %: " + valor + "\n");
 					sellAction(acao);
-					this.ListAcoesAtuais.remove(acao);
+					this.listAcoesAtuais.remove(acao);
 					i--;
 					this.goalActionsNumber--;
-					if (this.goalActionsNumber <= 0 && this.ListAcoesAtuais.isEmpty()) {
+					if (this.goalActionsNumber <= 0 && this.listAcoesAtuais.isEmpty()) {
 						this.soldAll = true;
 					}
 				}
@@ -213,9 +271,9 @@ public class InvestidorAgentBDI {
 	private void checkSellActionsRandom() {
 		double valor = 0;
 
-		if (!this.ListAcoesAtuais.isEmpty()) {
-			for (int i = 0; i < this.ListAcoesAtuais.size(); i++) {
-				Acao acao = this.ListAcoesAtuais.get(i);
+		if (!this.listAcoesAtuais.isEmpty()) {
+			for (int i = 0; i < this.listAcoesAtuais.size(); i++) {
+				Acao acao = this.listAcoesAtuais.get(i);
 
 				int FlagUpdate = ThreadLocalRandom.current().nextInt(0, 2);
 
@@ -223,10 +281,10 @@ public class InvestidorAgentBDI {
 					valor = getPercetWithAtualCotacao(acao);
 					frame.jTextArea1.append("VOU VENDER: " + acao.getNomeBolsa() + " a uma %: " + valor + "\n");
 					sellAction(acao);
-					this.ListAcoesAtuais.remove(acao);
+					this.listAcoesAtuais.remove(acao);
 					i--;
 					this.goalActionsNumber--;
-					if (this.goalActionsNumber <= 0 && this.ListAcoesAtuais.isEmpty()) {
+					if (this.goalActionsNumber <= 0 && this.listAcoesAtuais.isEmpty()) {
 						this.soldAll = true;
 					}
 				}
@@ -337,19 +395,19 @@ public class InvestidorAgentBDI {
 	}
 
 	public List<Acao> getListAcoesVendidas() {
-		return ListAcoesVendidas;
+		return listAcoesVendidas;
 	}
 
 	public void addListAcoesVendidas(Acao acao) {
-		this.ListAcoesVendidas.add(acao);
+		this.listAcoesVendidas.add(acao);
 	}
 
 	public List<InvestidorAgentBDI> getListASeguir() {
-		return this.ListASeguir;
+		return this.listFollowing;
 	}
 
 	public void addListASeguir(InvestidorAgentBDI agent) {
-		this.ListASeguir.add(agent);
+		this.listFollowing.add(agent);
 	}
 
 	public double getCash() {
