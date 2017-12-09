@@ -27,6 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
 		@Argument(name = "percentToBuy", clazz = int.class, defaultvalue = "-1"),
 		@Argument(name = "percentToSell", clazz = int.class, defaultvalue = "-1"),
 		@Argument(name = "percentMinToSellAndLoose", clazz = int.class, defaultvalue = "-1"),
+		@Argument(name = "percentMinToFollow", clazz = int.class, defaultvalue = "-1"),
 		@Argument(name = "numberOfCotacoesToCheck", clazz = int.class, defaultvalue = "1"),
 		@Argument(name = "isRandomAgent", clazz = boolean.class, defaultvalue = "false"),
 		@Argument(name = "timeToAskBolsa", clazz = int.class, defaultvalue = "-1"),
@@ -50,11 +51,14 @@ public class InvestidorAgentBDI implements IFollowService {
 	private int percentToBuy;
 	private int percentToSell;
 	private int percentMinToSellAndLoose;
+	private int percentMinToFollow;
+	private int valueToFollow;
 	private int numberOfCotacoesToCheck;
 	private boolean isRandomAgent;
 	private AgentLogFrame frame;
 	private int goalActionsNumber;
 	private boolean soldAll;
+	
 	
 	private List<InvestidorAgentBDI> listFollowing;	//Quem estou a seguir
 	private List<InvestidorAgentBDI> listFollowers;	//Os meus seguidores
@@ -68,6 +72,7 @@ public class InvestidorAgentBDI implements IFollowService {
 		this.percentToBuy = (int) agent.getArgument("percentToBuy");
 		this.percentToSell = (int) agent.getArgument("percentToSell");
 		this.percentMinToSellAndLoose = - (int) agent.getArgument("percentMinToSellAndLoose");
+		this.percentMinToFollow = (int) agent.getArgument("percentMinToFollow");
 		this.numberOfCotacoesToCheck = (int) agent.getArgument("numberOfCotacoesToCheck");
 		this.isRandomAgent = (boolean) agent.getArgument("isRandomAgent");
 		this.timeToAskBolsa = (int) agent.getArgument("timeToAskBolsa");
@@ -118,7 +123,8 @@ public class InvestidorAgentBDI implements IFollowService {
 		this.listFollowing = new ArrayList<InvestidorAgentBDI>();
 		this.listFollowers = new ArrayList<InvestidorAgentBDI>();
 		this.soldAll = false;
-
+		this.valueToFollow = (int) (getCash() + (getCash()*(percentMinToFollow*0.01)));
+		
 		agent.dispatchTopLevelGoal(new AGoalActionsNumber(this.goalActionsNumber));
 	}
 
@@ -160,7 +166,7 @@ public class InvestidorAgentBDI implements IFollowService {
 	}
 	
 	public void checkForNewAgentsToFollow() {		
-		follow = new Following(this, 90000);
+		follow = new Following(this, this.valueToFollow);
 		SServiceProvider.getServices(agent.getServiceProvider(), IFollowService.class, RequiredServiceInfo.SCOPE_PLATFORM).addResultListener(new IntermediateDefaultResultListener<IFollowService>() {
 			public void intermediateResultAvailable(IFollowService is) {
 				is.checkToFollow(follow.clone());
@@ -404,7 +410,7 @@ public class InvestidorAgentBDI implements IFollowService {
 	private boolean buyThisAction(InvestidorAgentBDI agent, Acao acao) {
 		if(!checkIfDontHaveAction(acao.getNomeBolsa())) {
 			String text = "";
-			text += "O agente " +agent.getNome()+ " disse para comprar a acao "+ acao.getNomeBolsa() +", mas já a tenho.\n";
+			text += "O agente " +agent.getNome()+ " disse para comprar a acao "+ acao.getNomeBolsa() +", mas ja a tenho.\n";
 			frame.jTextArea1.append(text);
 			return false;
 		}		
@@ -415,7 +421,7 @@ public class InvestidorAgentBDI implements IFollowService {
 			this.retCash(nAcao.getValorDeCompra());
 			
 			String text = "";
-			text += "Vou comprar a ação que o " +agent.getNome()+ " comprou:\n";
+			text += "Vou comprar a acao que o " +agent.getNome()+ " comprou:\n";
 			text += "Comprei a acao: " + nAcao.getNomeBolsa() + " com uma cotacao de: " + nAcao.getCotacao().getCotacao() + " gastando " + nAcao.getValorDeCompra() + "\n";
 			text += "Valor em conta: " + getCash() + "\n";
 			
@@ -423,7 +429,7 @@ public class InvestidorAgentBDI implements IFollowService {
 			return true;
 		} else {
 			String text = "";
-			text += "Ia a ação "+acao.getNomeBolsa() + " que o " +agent.getNome()+ " comprou, mas não tenho dinheiro.\n";
+			text += "Ia a acao "+acao.getNomeBolsa() + " que o " +agent.getNome()+ " comprou, mas não tenho dinheiro.\n";
 			frame.jTextArea1.append(text);
 			return false;
 		}
