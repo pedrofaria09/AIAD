@@ -257,7 +257,7 @@ public class InvestidorAgentBDI {
 		addCash(valorAretirar);
 
 		//TODO maybe change this to a Trigger????
-		frame.jTextArea1.append("Vendi a acao:" + acao.getNomeBolsa() + " com uma cotacao de: " + lastCotacao.getCotacao() + " e ganhei: " + valorAretirar + "\n");
+		frame.jTextArea1.append("Vendi a acao:" + acao.getNomeBolsa() + " com uma cotacao de: " + lastCotacao.getCotacao() + " com um valor de: " + valorAretirar + "\n");
 		frame.jTextArea1.append("Valor em conta: " + getCash() + "\n");
 	}
 
