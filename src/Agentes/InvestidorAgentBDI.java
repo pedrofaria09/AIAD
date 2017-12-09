@@ -137,7 +137,7 @@ public class InvestidorAgentBDI implements IFollowService {
 		}
 
 		imprime();
-		frame.jTextArea1.append("*** Acabei vendendo o numero de acoes desejadas - Valor em conta: " + this.cash + " *** \n");
+		frame.jTextArea1.append("*** Acabei vendendo o numero de acoes desejadas - Valor em conta: " + getCash() + " *** \n");
 	}
 	
 	public void printFollowersAndFollowing() {
@@ -172,12 +172,12 @@ public class InvestidorAgentBDI implements IFollowService {
 		});
 	}
 	
-	/*Recebe um objecto Following que contém:
+	/*Recebe um objecto Following que contï¿½m:
 	 * Agente que procura agentes para seguir
 	 * Valor que faz com que ele queira seguir um agente
 	*/
 	public void checkToFollow(Following f) {	
-		//Para não comunicar com ele próprio
+		//Para nï¿½o comunicar com ele prï¿½prio
 		if(f.getAgent().getNome() == this.nome) {
 			return;
 		}
@@ -196,7 +196,7 @@ public class InvestidorAgentBDI implements IFollowService {
 	}
 	
 	public void checkToNotFollow(Following f) {	
-		//Para não comunicar com ele próprio
+		//Para nï¿½o comunicar com ele prï¿½prio
 		if(f.getAgent().getNome() == this.nome) {
 			return;
 		}
@@ -259,7 +259,7 @@ public class InvestidorAgentBDI implements IFollowService {
 				valor = Auxiliar.round(valor,2);
 				if (valor >= percentToSell || valor <= percentMinToSellAndLoose) {
 					frame.jTextArea1.append("VOU VENDER: " + acao.getNomeBolsa() + " a uma %: " + valor + "\n");
-					sellAction(acao);
+					sellAction(acao,valor);
 					this.listAcoesAtuais.remove(acao);
 					i--;
 					this.goalActionsNumber--;
@@ -285,7 +285,7 @@ public class InvestidorAgentBDI implements IFollowService {
 					valor = getPercetWithAtualCotacao(acao);
 					valor = Auxiliar.round(valor,2);
 					frame.jTextArea1.append("VOU VENDER: " + acao.getNomeBolsa() + " a uma %: " + valor + "\n");
-					sellAction(acao);
+					sellAction(acao, valor);
 					this.listAcoesAtuais.remove(acao);
 					i--;
 					this.goalActionsNumber--;
@@ -298,7 +298,7 @@ public class InvestidorAgentBDI implements IFollowService {
 
 	}
 
-	private void sellAction(Acao ac) {
+	private void sellAction(Acao ac, double valor) {
 		Acao acao = ac;
 		Bolsa bolsa = null;
 		Cotacao lastCotacao = null;
@@ -310,8 +310,8 @@ public class InvestidorAgentBDI implements IFollowService {
 		}
 		lastCotacao = bolsa.getListVariacaoCotacao().get(bolsa.getListVariacaoCotacao().size() - 1);
 
-		double taxa = lastCotacao.getCotacao() - acao.getCotacao().getCotacao();
-		double valorAretirar = acao.getValorDeCompra() + acao.getValorDeCompra() * taxa;
+		double taxa = valor*0.01;
+		double valorAretirar = acao.getValorDeCompra() + (acao.getValorDeCompra() * taxa);
 		valorAretirar = Auxiliar.round(valorAretirar, 2);
 		acaoAtual = new Acao(getNome(), bolsa.getNome(), lastCotacao, valorAretirar);
 		addListAcoesVendidas(acaoAtual);
@@ -327,7 +327,7 @@ public class InvestidorAgentBDI implements IFollowService {
 		for (Bolsa bolsa : getValoresBolsa()) {
 			if (ac.getNomeBolsa().equals(bolsa.getNome())) {
 				lastCotacao = bolsa.getListVariacaoCotacao().get(bolsa.getListVariacaoCotacao().size() - 1).getCotacao();
-				return (100 - (ac.getCotacao().getCotacao() * 100 / lastCotacao));
+				return (100 - ((ac.getCotacao().getCotacao() * 100) / lastCotacao));
 			}
 		}
 		return 0;
@@ -416,15 +416,15 @@ public class InvestidorAgentBDI implements IFollowService {
 	}
 
 	public double getCash() {
-		return this.cash;
+		return Auxiliar.round(this.cash, 2);
 	}
 
 	public void addCash(double cash) {
-		this.cash += cash;
+		this.cash += Auxiliar.round(cash, 2);
 	}
 
 	public void retCash(double cash) {
-		this.cash -= cash;
+		this.cash -= Auxiliar.round(cash, 2);
 	}
 
 	public String getNome() {
