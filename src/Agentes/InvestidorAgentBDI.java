@@ -10,10 +10,13 @@ import jadex.bdiv3.annotation.*;
 import jadex.bdiv3.runtime.IPlan;
 import jadex.bridge.service.RequiredServiceInfo;
 import jadex.bridge.service.search.SServiceProvider;
+import jadex.commons.future.DefaultResultListener;
+import jadex.commons.future.IFuture;
 import jadex.micro.annotation.*;
 
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -29,6 +32,9 @@ import java.util.concurrent.ThreadLocalRandom;
 		@Argument(name = "timeToAskBolsa", clazz = int.class, defaultvalue = "-1"),
 		@Argument(name = "goalActionsNumber", clazz = int.class, defaultvalue = "-1")
 })
+@Description("This agent buys and sells actions")
+@ProvidedServices(@ProvidedService(type=IFollowService.class, implementation=@Implementation(FollowService.class)))
+@RequiredServices(@RequiredService(name="chatservices", type=IFollowService.class, binding=@Binding(scope=Binding.SCOPE_PLATFORM)))
 public class InvestidorAgentBDI {
 	@Agent
 	protected BDIAgent agent;
@@ -37,6 +43,7 @@ public class InvestidorAgentBDI {
 	private List<Acao> ListAcoesVendidas;
 	private List<InvestidorAgentBDI> ListASeguir;
 	private List<Bolsa> valoresBolsa;
+	private List<String> agentsFollowing;
 	private String nome;
 	private double cash = 100000;
 	private int timeToAskBolsa;
@@ -104,6 +111,7 @@ public class InvestidorAgentBDI {
 		this.ListAcoesVendidas = new ArrayList<Acao>();
 		this.ListASeguir = new ArrayList<InvestidorAgentBDI>();
 		this.soldAll = false;
+		this.agentsFollowing = new ArrayList<String>();
 
 		agent.dispatchTopLevelGoal(new AGoalActionsNumber(this.goalActionsNumber));
 	}
@@ -115,10 +123,52 @@ public class InvestidorAgentBDI {
 			BolsaService bolsa = SServiceProvider.getService(agent.getServiceProvider(), BolsaService.class, RequiredServiceInfo.SCOPE_PLATFORM).get();
 
 			setValoresBolsa(bolsa.getValoresBolsa());
+			checkForNewAgentsToFollow();
 		}
 
 		imprime();
 		frame.jTextArea1.append("*** Acabei vendendo o n√∫mero de a√ß√µes desejadas - Valor em conta: " + this.cash + " ***");
+	}
+	
+	public void checkForNewAgentsToFollow() {
+		IFuture<Collection<IFollowService>> chatservices = agent.getServiceContainer().getRequiredServices("chatservices");
+		chatservices.addResultListener(new DefaultResultListener<Collection<IFollowService>>() {	
+			public void resultAvailable(Collection<IFollowService> result) {				
+				for(IFollowService cs : result) {
+					//Para j· ele envia 100.000, mas dps isto passa a uma vari·vel do agente
+					String agentToFollow = cs.niceToFollow(agent.getComponentIdentifier().getLocalName(), 100000);
+					String agentToUnFollow = cs.notNiceToFollow(agent.getComponentIdentifier().getLocalName(), 100000);
+					
+					if(agentToFollow != null && agentToFollow != nome) {
+						if(!agentsFollowing.contains(agentToFollow)) {
+							agentsFollowing.add(agentToFollow);
+						}						
+					}
+					
+					if(agentToUnFollow != null && agentToUnFollow != nome) {
+						if(agentsFollowing.contains(agentToUnFollow)) {
+							agentsFollowing.remove(agentToUnFollow);
+						}						
+					}
+					
+				}
+				
+				String text = "";
+				
+				if(!agentsFollowing.isEmpty()) {
+					text += "==============================================\n";
+					text += "Neste momento estou a seguir os agentes:\n";
+					for(String agente : agentsFollowing) {
+						text += "-" +agente;
+					}
+					text += "\n==============================================\n\n";
+				} else {
+					text +="\nNeste momento n„o estou a seguir ninguÈm\n";
+				}
+				
+				frame.jTextArea1.append(text);
+			}			
+		});
 	}
 
 	@Plan(trigger = @Trigger(factchangeds = "valoresBolsa"))
