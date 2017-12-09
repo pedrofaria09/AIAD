@@ -28,9 +28,10 @@ import java.util.concurrent.ThreadLocalRandom;
 		@Argument(name = "nome", clazz = String.class, defaultvalue = "N/A"),
 		@Argument(name = "valueToBuyAction", clazz = int.class, defaultvalue = "-1"),
 		@Argument(name = "percentToBuy", clazz = int.class, defaultvalue = "-1"),
+		@Argument(name = "percentToSell", clazz = int.class, defaultvalue = "-1"),
+		@Argument(name = "percentMinToSellAndLoose", clazz = int.class, defaultvalue = "-1"),
 		@Argument(name = "numberOfCotacoesToCheck", clazz = int.class, defaultvalue = "1"),
 		@Argument(name = "isRandomAgent", clazz = boolean.class, defaultvalue = "false"),
-		@Argument(name = "percentToSell", clazz = int.class, defaultvalue = "-1"),
 		@Argument(name = "timeToAskBolsa", clazz = int.class, defaultvalue = "-1"),
 		@Argument(name = "goalActionsNumber", clazz = int.class, defaultvalue = "-1")
 })
@@ -49,9 +50,10 @@ public class InvestidorAgentBDI implements IFollowService {
 	private double cash = 100000;
 	private int timeToAskBolsa;
 	private int valueToBuyAction;
-	private int percentToBuy; //5% of variation of the action
+	private int percentToBuy;
 	private int percentToSell;
-	private int numberOfCotacoesToCheck; // will check the last 3 actions to buy.
+	private int percentMinToSellAndLoose;
+	private int numberOfCotacoesToCheck;
 	private boolean isRandomAgent;
 	private AgentLogFrame frame;
 	private int goalActionsNumber;
@@ -68,6 +70,7 @@ public class InvestidorAgentBDI implements IFollowService {
 		this.valueToBuyAction = (int) agent.getArgument("valueToBuyAction");
 		this.percentToBuy = (int) agent.getArgument("percentToBuy");
 		this.percentToSell = (int) agent.getArgument("percentToSell");
+		this.percentMinToSellAndLoose = - (int) agent.getArgument("percentMinToSellAndLoose");
 		this.numberOfCotacoesToCheck = (int) agent.getArgument("numberOfCotacoesToCheck");
 		this.isRandomAgent = (boolean) agent.getArgument("isRandomAgent");
 		this.timeToAskBolsa = (int) agent.getArgument("timeToAskBolsa");
@@ -134,7 +137,7 @@ public class InvestidorAgentBDI implements IFollowService {
 		}
 
 		imprime();
-		frame.jTextArea1.append("*** Acabei vendendo o número de ações desejadas - Valor em conta: " + this.cash + " ***");
+		frame.jTextArea1.append("*** Acabei vendendo o numero de acoes desejadas - Valor em conta: " + this.cash + " *** \n");
 	}
 	
 	public void printFollowersAndFollowing() {
@@ -253,7 +256,8 @@ public class InvestidorAgentBDI implements IFollowService {
 			for (int i = 0; i < this.listAcoesAtuais.size(); i++) {
 				Acao acao = this.listAcoesAtuais.get(i);
 				valor = getPercetWithAtualCotacao(acao);
-				if (valor >= percentToSell) {
+				valor = Auxiliar.round(valor,2);
+				if (valor >= percentToSell || valor <= percentMinToSellAndLoose) {
 					frame.jTextArea1.append("VOU VENDER: " + acao.getNomeBolsa() + " a uma %: " + valor + "\n");
 					sellAction(acao);
 					this.listAcoesAtuais.remove(acao);
@@ -279,6 +283,7 @@ public class InvestidorAgentBDI implements IFollowService {
 
 				if (FlagUpdate == 1) {
 					valor = getPercetWithAtualCotacao(acao);
+					valor = Auxiliar.round(valor,2);
 					frame.jTextArea1.append("VOU VENDER: " + acao.getNomeBolsa() + " a uma %: " + valor + "\n");
 					sellAction(acao);
 					this.listAcoesAtuais.remove(acao);
@@ -313,7 +318,7 @@ public class InvestidorAgentBDI implements IFollowService {
 		addCash(valorAretirar);
 
 		//TODO maybe change this to a Trigger????
-		frame.jTextArea1.append("Vendi a acao:" + acao.getNomeBolsa() + " com uma cotacao de: " + lastCotacao.getCotacao() + " e ganhei: " + valorAretirar + "\n");
+		frame.jTextArea1.append("Vendi a acao:" + acao.getNomeBolsa() + " com uma cotacao de: " + lastCotacao.getCotacao() + " com um valor de: " + valorAretirar + "\n");
 		frame.jTextArea1.append("Valor em conta: " + getCash() + "\n");
 	}
 
