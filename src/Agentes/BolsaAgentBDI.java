@@ -76,10 +76,10 @@ public class BolsaAgentBDI implements BolsaService {
 			cot = bol.getListVariacaoCotacao().get(bol.getListVariacaoCotacao().size()-1);
 			double auxCotacao = ThreadLocalRandom.current().nextDouble(0.01,0.06);
 			
-			if(FlagUpdate == 0 || FlagUpdate == 1 || FlagUpdate == 2) {
-				newCot = (cot.getCotacao() + cot.getCotacao()*auxCotacao);
-			}else if(FlagUpdate == 3 || FlagUpdate == 4){
-				newCot = (cot.getCotacao() - cot.getCotacao()*auxCotacao);
+			if(FlagUpdate == 0 || FlagUpdate == 2 || FlagUpdate == 4) {
+				newCot = (cot.getCotacao() + (cot.getCotacao()*auxCotacao));
+			}else if(FlagUpdate == 1 || FlagUpdate == 3){
+				newCot = (cot.getCotacao() - (cot.getCotacao()*auxCotacao));
 				if(newCot < 0)
 					newCot = 0;
 			}else {
@@ -109,7 +109,7 @@ public class BolsaAgentBDI implements BolsaService {
 			penultimaCotacao = bol.getListVariacaoCotacao().get(bol.getListVariacaoCotacao().size()-2).getCotacao();
 			percentagem = (100-((ultimaCotacao*100)/penultimaCotacao));
 			percentagem = Auxiliar.round(percentagem,2);
-			frame.jTextArea1.append(name + " - Variação: " + ultimaCotacao + " - > " + penultimaCotacao + " Percentagem: " + percentagem + "%\n");
+			frame.jTextArea1.append(name + " - Variação: " + ultimaCotacao + " -> " + penultimaCotacao + " Percentagem: " + percentagem + "%\n");
 		}
 	}
 
