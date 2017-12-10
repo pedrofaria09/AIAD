@@ -320,11 +320,13 @@ public class Setup extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			AgentArgs temp = new AgentArgs();
 			getData(temp);
-			if (isModified(temp)) {
+			//if (isModified(temp)) {
 				agents.add(temp);
 				System.out.println("Adicionado Agente " + temp.getName());
+				System.out.println("nr de accoes = " + temp.getGoalNumber());
+			System.out.println("starting money = " + temp.getStartingMoney());
 				setData(new AgentArgs());
-			}
+			//}
 		}
 	}
 
