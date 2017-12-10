@@ -22,8 +22,12 @@ public class AgentLogFrame extends JFrame {
 		jTextArea1 = new JTextArea(30, 40);
 		jTextArea1.setEditable(false);
 
-		DefaultCaret caret = (DefaultCaret)jTextArea1.getCaret();
-		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+		String SO = System.getProperty("os.name");
+		if(!SO.equals("Mac OS X")) {
+			DefaultCaret caret = (DefaultCaret)jTextArea1.getCaret();
+			caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+		}
+		
 		add(new JScrollPane(jTextArea1),BorderLayout.CENTER);
 		super.setPreferredSize(new Dimension(300,300));
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
