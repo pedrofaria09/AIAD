@@ -365,7 +365,7 @@ public class InvestidorAgentBDI implements IFollowService {
 			lucroToMe = lucro * (2/3);
 			lucroToTheOtherAgent = lucro - lucroToMe;
 			
-			ac.getAgenteSugeriu().giveMoney(this.nome, lucroToTheOtherAgent);
+			ac.getAgenteSugeriu().giveMoney(this.nome, Auxiliar.round(lucroToTheOtherAgent, 2));
 			lucro = lucroToMe;
 			
 			valorAretirar = acao.getValorDeCompra() + lucro;
@@ -467,9 +467,9 @@ public class InvestidorAgentBDI implements IFollowService {
 		}		
 		
 		if(this.cash > acao.getValorDeCompra()) {
-			Acao nAcao = new Acao(getNome(), acao.getNomeBolsa(), acao.getCotacao(), acao.getValorDeCompra(), agent);
+			Acao nAcao = new Acao(getNome(), acao.getNomeBolsa(), acao.getCotacao(), valueToBuyAction, agent);
 			this.addListAcoesCompradas(nAcao);
-			this.retCash(nAcao.getValorDeCompra());
+			this.retCash(valueToBuyAction);
 			
 			String text = "";
 			text += "Vou comprar a acao que o " +agent.getNome()+ " comprou:\n";
