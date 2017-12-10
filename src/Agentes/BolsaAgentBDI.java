@@ -5,6 +5,9 @@ import jadex.bdiv3.BDIAgent;
 import jadex.bdiv3.annotation.Plan;
 import jadex.bdiv3.runtime.IPlan;
 import jadex.micro.annotation.AgentBody;
+import jadex.micro.annotation.Argument;
+import jadex.micro.annotation.Arguments;
+import jadex.micro.annotation.Description;
 import jadex.micro.annotation.Agent;
 import jadex.micro.annotation.ProvidedServices;
 import jadex.micro.annotation.ProvidedService;
@@ -21,15 +24,21 @@ import Auxiliar.AgentLogFrame;
 import javax.swing.*;
 
 @Agent
+@Arguments({
+	@Argument(name = "TIMEBOLSA", clazz = int.class, defaultvalue = "-1")
+})
 @Service
+@Description("Este agente trata de atualizar os valores das cotacoes da bolsa")
 @ProvidedServices(@ProvidedService(type=BolsaService.class))
 public class BolsaAgentBDI implements BolsaService {
 	private List<Bolsa> ListaBolsa = new ArrayList<Bolsa>();
-	private final int TIMEBOLSA = 2000;
+	private final int TIMEBOLSA;
 
 	private AgentLogFrame frame;
 
 	public BolsaAgentBDI() {
+		this.TIMEBOLSA = (int) agent.getArgument("TIMEBOLSA");
+		
 		frame = new AgentLogFrame();
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -40,6 +49,7 @@ public class BolsaAgentBDI implements BolsaService {
 				frame.setVisible(true);
 			}
 		});
+		
 		this.ListaBolsa = loadBolsa();
 	}
 

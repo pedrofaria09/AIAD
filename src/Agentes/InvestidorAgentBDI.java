@@ -26,6 +26,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @Agent
 @Arguments({
 		@Argument(name = "nome", clazz = String.class, defaultvalue = "N/A"),
+		@Argument(name = "initialCash", clazz = int.class, defaultvalue = "-1"),
 		@Argument(name = "valueToBuyAction", clazz = int.class, defaultvalue = "-1"),
 		@Argument(name = "percentToBuy", clazz = int.class, defaultvalue = "-1"),
 		@Argument(name = "percentToSell", clazz = int.class, defaultvalue = "-1"),
@@ -37,7 +38,7 @@ import java.util.concurrent.ThreadLocalRandom;
 		@Argument(name = "goalActionsNumber", clazz = int.class, defaultvalue = "-1")
 })
 @Service
-@Description("This agent buys and sells actions")
+@Description("Este agente compra e vende ações, autonomamente ou seguindo outros agentes")
 @ProvidedServices(@ProvidedService(type=IFollowService.class))
 @RequiredServices(@RequiredService(name="chatservices", type=IFollowService.class, binding=@Binding(scope=Binding.SCOPE_PLATFORM)))
 public class InvestidorAgentBDI implements IFollowService {
@@ -48,7 +49,7 @@ public class InvestidorAgentBDI implements IFollowService {
 	private List<Acao> listAcoesVendidas;
 	private List<Bolsa> valoresBolsa;
 	private String nome;
-	private double cash = 100000;
+	private double cash;
 	private int timeToAskBolsa;
 	private int valueToBuyAction;
 	private int percentToBuy;
@@ -70,6 +71,7 @@ public class InvestidorAgentBDI implements IFollowService {
 	@AgentCreated
 	public void init() {
 		this.nome = (String) agent.getArgument("nome");
+		this.cash = (int) agent.getArgument("initialCash");
 		this.valueToBuyAction = (int) agent.getArgument("valueToBuyAction");
 		this.percentToBuy = (int) agent.getArgument("percentToBuy");
 		this.percentToSell = (int) agent.getArgument("percentToSell");

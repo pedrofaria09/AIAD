@@ -54,6 +54,7 @@ public class Setup extends JFrame {
 		//Agente Arriscado
 		Map<String, Object> arriscadoArgs = new HashMap<String, Object>();
 		arriscadoArgs.put("nome", "Agente Arriscado");
+		arriscadoArgs.put("initialCash", 100000);
 		arriscadoArgs.put("valueToBuyAction", 3000);
 		arriscadoArgs.put("percentToBuy", 5);
 		arriscadoArgs.put("percentToSell", 10);
@@ -67,6 +68,7 @@ public class Setup extends JFrame {
 		//Agente Cauteloso
 		Map<String, Object> cautelosoArgs = new HashMap<String, Object>();
 		cautelosoArgs.put("nome", "Agente Cauteloso");
+		cautelosoArgs.put("initialCash", 100000);
 		cautelosoArgs.put("valueToBuyAction", 2000);
 		cautelosoArgs.put("percentToBuy", 7);
 		cautelosoArgs.put("percentToSell", 5);
@@ -80,18 +82,24 @@ public class Setup extends JFrame {
 		//Agente Random
 		Map<String, Object> randomArgs = new HashMap<String, Object>();
 		randomArgs.put("nome", "Agente Random");
+		randomArgs.put("initialCash", 100000);
 		randomArgs.put("valueToBuyAction", 2000);
 		randomArgs.put("percentMinToFollow", 0.5);
 		randomArgs.put("numberOfCotacoesToCheck", 3);
 		randomArgs.put("timeToAskBolsa", 6950);
 		randomArgs.put("isRandomAgent", true);
 		randomArgs.put("goalActionsNumber", 10);
-
+		
+		//Agente Bolsa
+		Map<String, Object> bolsaArgs = new HashMap<String, Object>();
+		bolsaArgs.put("TIMEBOLSA", 2000);
+		
 		CreationInfo investidorArriscadoInfo = new CreationInfo(arriscadoArgs);
 		CreationInfo investidorCautelosoInfo = new CreationInfo(cautelosoArgs);
 		CreationInfo investidorRandomInfo = new CreationInfo(randomArgs);
+		CreationInfo bolsaInfo = new CreationInfo(bolsaArgs);
 
-		IComponentIdentifier agenteBolsa = this.cms.createComponent("bin/Agentes/BolsaAgentBDI.class", null).getFirstResult(this.sus);
+		IComponentIdentifier agenteBolsa = this.cms.createComponent("bin/Agentes/BolsaAgentBDI.class", bolsaInfo).getFirstResult(this.sus);
 		IComponentIdentifier agenteInvestidor1 = this.cms.createComponent("bin/Agentes/InvestidorAgentBDI.class", investidorArriscadoInfo).getFirstResult(this.sus);
 		IComponentIdentifier agenteInvestidor2 = this.cms.createComponent("bin/Agentes/InvestidorAgentBDI.class", investidorCautelosoInfo).getFirstResult(this.sus);
 		IComponentIdentifier agenteInvestidor3 = this.cms.createComponent("bin/Agentes/InvestidorAgentBDI.class", investidorRandomInfo).getFirstResult(this.sus);
