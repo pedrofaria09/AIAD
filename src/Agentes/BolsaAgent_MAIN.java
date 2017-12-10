@@ -27,8 +27,8 @@ public class BolsaAgent_MAIN {
         arriscadoArgs.put("valueToBuyAction", 3000);
         arriscadoArgs.put("percentToBuy", 5);
         arriscadoArgs.put("percentToSell", 10);
-        arriscadoArgs.put("percentMinToSellAndLoose", 2);
-        arriscadoArgs.put("percentMinToFollow", 1);
+        arriscadoArgs.put("percentMinToSellAndLoose", 10);
+        arriscadoArgs.put("percentMinToFollow", 0.5);
         arriscadoArgs.put("numberOfCotacoesToCheck", 3);
         arriscadoArgs.put("timeToAskBolsa", 7050);
         arriscadoArgs.put("isRandomAgent", false);
@@ -40,8 +40,8 @@ public class BolsaAgent_MAIN {
         cautelosoArgs.put("valueToBuyAction", 2000);
         cautelosoArgs.put("percentToBuy", 7);
         cautelosoArgs.put("percentToSell", 5);
-        cautelosoArgs.put("percentMinToSellAndLoose", 2);
-        cautelosoArgs.put("percentMinToFollow", 1);
+        cautelosoArgs.put("percentMinToSellAndLoose", 5);
+        cautelosoArgs.put("percentMinToFollow", 0.5);
         cautelosoArgs.put("numberOfCotacoesToCheck", 3);
         cautelosoArgs.put("timeToAskBolsa", 7000);
         cautelosoArgs.put("isRandomAgent", false);
@@ -51,7 +51,7 @@ public class BolsaAgent_MAIN {
         Map<String, Object> randomArgs = new HashMap<String, Object>();
         randomArgs.put("nome", "Agente Random");
         randomArgs.put("valueToBuyAction", 2000);
-        randomArgs.put("percentMinToFollow", 1);
+        randomArgs.put("percentMinToFollow", 0.5);
         randomArgs.put("numberOfCotacoesToCheck", 3);
         randomArgs.put("timeToAskBolsa", 6950);
         randomArgs.put("isRandomAgent", true);

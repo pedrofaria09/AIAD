@@ -36,8 +36,8 @@ public class BolsaAgentBDI implements BolsaService {
 			public void run() {
 				frame.setTitle("Bolsa");
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				frame.jTextArea1.append("Hello! I'm the Bolsa Service \n");
-				frame.setSize(300, 300);
+				frame.jTextArea1.append("Ola, sou o Agente Bolsa \n");
+				frame.setSize(500, 400);
 				frame.setVisible(true);
 			}
 		});
@@ -61,49 +61,7 @@ public class BolsaAgentBDI implements BolsaService {
 			imprimeBolsa2();
 		}
 	}
-	/*
-	private List<Acao> ListaAcoesCompradas = new ArrayList<Acao>();
-	private List<Acao> ListaAcoesVendidas = new ArrayList<Acao>();
-	private List<Acao> ListaAcoesAtuais = new ArrayList<Acao>();
-	private List<InvestidorBDI> ListaInvestidores = new ArrayList<InvestidorBDI>();
-
-	// Getters and adds
-	public List<Bolsa> getBolsa(){
-		return this.ListaBolsa;
-	}
-
-	public List<Acao> getListaAcoesCompradas() {
-		return this.ListaAcoesCompradas;
-	}
-
-	public void addListaAcoesCompradas(Acao acao) {
-		this.ListaAcoesCompradas.add(acao);
-	}
-
-	public List<Acao> getListaAcoesVendidas() {
-		return this.ListaAcoesVendidas;
-	}
-
-	public void addListaAcoesVendidas(Acao acao) {
-		this.ListaAcoesVendidas.add(acao);
-	}
-
-	public List<Acao> getListaAcoesAtuais() {
-		return this.ListaAcoesAtuais;
-	}
-
-	public void addListaAcoesAtuais(Acao acao) {
-		this.ListaAcoesAtuais.add(acao);
-	}
-
-	public List<InvestidorBDI> getListaInvestidores() {
-		return this.ListaInvestidores;
-	}
-
-	public void addListaInvestidores(InvestidorBDI agente) {
-		this.ListaInvestidores.add(agente);
-	}*/
-
+	
 	public IFuture<List<Bolsa>> getValoresBolsa() {
 		return new Future<List<Bolsa>>(this.ListaBolsa);
 	}
@@ -134,59 +92,7 @@ public class BolsaAgentBDI implements BolsaService {
 			bol.addListVariacaoCotacao(cot);
 		}
 	}
-	/*
-	public void comprarAcao(InvestidorBDI agent, String nomeAcao, double valorDeCompra) {
-		Bolsa bolsa = null;
-		Acao acao = null;
-		Cotacao lastCotacao = null;
-
-		for(Bolsa bol: ListaBolsa) {
-			if(bol.getNome().equals(nomeAcao))
-				bolsa = bol;
-		}
-
-		if(bolsa != null) {
-			lastCotacao = bolsa.getListVariacaoCotacao().get(bolsa.getListVariacaoCotacao().size()-1);
-			acao = new Acao(agent.getNome(),bolsa.getNome(),lastCotacao, valorDeCompra);
-
-			agent.addListAcoesCompradas(acao);
-			agent.retCash(valorDeCompra);
-		}else {
-			System.out.println("Bolsa a comprar não foi encontrada");
-		}
-	}
-
-	public void venderAcao(InvestidorBDI agent, String nomeAcao) {
-		Acao acaoAretirar = null, acaoAtual = null;
-		Bolsa bolsa = null;
-		Cotacao lastCotacao = null;
-		for(Acao ac : agent.getListAcoesAtuais()) {
-			if(ac.getNomeBolsa().equals(nomeAcao))
-				acaoAretirar = ac;
-		}
-
-		if(acaoAretirar != null) {
-
-			for(Bolsa bol: ListaBolsa) {
-				if(bol.getNome().equals(nomeAcao))
-					bolsa = bol;
-			}
-			lastCotacao = bolsa.getListVariacaoCotacao().get(bolsa.getListVariacaoCotacao().size()-1);
-
-			double taxa = lastCotacao.getCotacao() - acaoAretirar.getCotacao().getCotacao();
-			double valorAretirar = acaoAretirar.getValorDeCompra()+acaoAretirar.getValorDeCompra()*taxa;
-			valorAretirar = Auxiliar.round(valorAretirar,2);
-			acaoAtual = new Acao(agent.getNome(),bolsa.getNome(), lastCotacao, valorAretirar);
-			agent.addListAcoesVendidas(acaoAtual);
-			agent.addCash(valorAretirar);
-			agent.getListAcoesAtuais().remove(acaoAretirar);
-
-		}else {
-			System.out.println("Bolsa a vender não foi encontrada");
-		}
-
-	}*/
-
+	
 	public void imprimeBolsa() {
 		for(Bolsa bol: this.ListaBolsa) {
 			bol.imprime();
