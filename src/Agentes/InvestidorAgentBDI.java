@@ -11,6 +11,9 @@ import jadex.bdiv3.runtime.IPlan;
 import jadex.bridge.service.RequiredServiceInfo;
 import jadex.bridge.service.annotation.Service;
 import jadex.bridge.service.search.SServiceProvider;
+import jadex.commons.future.DefaultResultListener;
+import jadex.commons.future.Future;
+import jadex.commons.future.IFuture;
 import jadex.commons.future.IntermediateDefaultResultListener;
 import jadex.micro.annotation.*;
 
@@ -134,11 +137,17 @@ public class InvestidorAgentBDI implements IFollowService {
 			plan.waitFor(timeToAskBolsa).get();
 			BolsaService bolsa = SServiceProvider.getService(agent.getServiceProvider(), BolsaService.class, RequiredServiceInfo.SCOPE_PLATFORM).get();
 
-			setValoresBolsa(bolsa.getValoresBolsa());
-			checkForNewAgentsToFollow();
-			printFollowersAndFollowing();
+			bolsa.getValoresBolsa().addResultListener(new DefaultResultListener<List<Bolsa>>() {
+				public void resultAvailable(List<Bolsa> listaValoresBolsa) {
+					//Um pedido assincrono que n terminou pode alterar a variavel soldAll, enquanto eu estou no waitFor
+					if(!soldAll) {
+						setValoresBolsa(listaValoresBolsa);
+						checkForNewAgentsToFollow();
+					}					
+				}
+			});
 		}
-
+		
 		imprime();
 		frame.jTextArea1.append("*** Acabei vendendo o numero de acoes desejadas - Valor em conta: " + getCash() + " *** \n");
 	}
@@ -172,17 +181,22 @@ public class InvestidorAgentBDI implements IFollowService {
 				is.checkToFollow(follow.clone());
 				is.checkToNotFollow(follow.clone());
 			}
+			
+			//Quando termina a comunicação com todos os agentes, imprime como ficou a sua lista de seguidores e de agentes que está a seguir
+			public void finished() {
+				printFollowersAndFollowing();
+		    }
 		});
 	}
 	
-	/*Recebe um objecto Following que contï¿½m:
+	/*Recebe um objecto Following que contem:
 	 * Agente que procura agentes para seguir
 	 * Valor que faz com que ele queira seguir um agente
 	*/
-	public void checkToFollow(Following f) {	
+	public IFuture<Void> checkToFollow(Following f) {	
 		//Para nï¿½o comunicar com ele prï¿½prio
 		if(f.getAgent().getNome() == this.nome) {
-			return;
+			return new Future<Void>();
 		}
 		
 		//Este agente serve para ele
@@ -193,12 +207,13 @@ public class InvestidorAgentBDI implements IFollowService {
 				f.getAgent().tellIsFollowing(this);
 			}		
 		} 	
+		return new Future<Void>();
 	}
 	
-	public void checkToNotFollow(Following f) {	
+	public IFuture<Void> checkToNotFollow(Following f) {	
 		//Para nï¿½o comunicar com ele prï¿½prio
 		if(f.getAgent().getNome() == this.nome) {
-			return;
+			return new Future<Void>();
 		}
 		
 		//Este agente serve para ele
@@ -209,24 +224,25 @@ public class InvestidorAgentBDI implements IFollowService {
 				f.getAgent().tellIsNotFollowing(this);				
 			}
 		} 		
+		return new Future<Void>();
 	}
 	
-	public void tellIsFollowing(InvestidorAgentBDI agente) {
+	public IFuture<Void> tellIsFollowing(InvestidorAgentBDI agente) {
 		if(!this.listFollowing.contains(agente)) {
 			this.listFollowing.add(agente);
 		}
+		return new Future<Void>();
 	}
 	
-	public void tellIsNotFollowing(InvestidorAgentBDI agente) {
+	public IFuture<Void> tellIsNotFollowing(InvestidorAgentBDI agente) {
 		if(this.listFollowing.contains(agente)) {
 			this.listFollowing.remove(agente);
 		}
+		return new Future<Void>();
 	}
 
 	@Plan(trigger = @Trigger(factchangeds = "valoresBolsa"))
 	public void printTime() {
-		//System.out.println("A bolsa foi alterada, oportunidade de analisar os valores!");
-
 		if (this.isRandomAgent) {
 			if (this.goalActionsNumber > 0) {
 				checkBuyActionsRandom();
@@ -353,11 +369,8 @@ public class InvestidorAgentBDI implements IFollowService {
 	}
 
 	private void checkBuyActionsRandom() {
-		double valor = 0;
-
 		// Get Percent of difference taking into action PERCENTTOBUY value
 		for (Bolsa bol : getValoresBolsa()) {
-			valor = 0;
 			if (bol.getListVariacaoCotacao().size() >= numberOfCotacoesToCheck) {
 				if (checkIfDontHaveAction(bol.getNome())) {
 					int FlagUpdate = ThreadLocalRandom.current().nextInt(0, 2);
@@ -407,12 +420,12 @@ public class InvestidorAgentBDI implements IFollowService {
 	}
 	
 	//Agente é informado por quem está a seguir de uma ação para comprar
-	private boolean buyThisAction(InvestidorAgentBDI agent, Acao acao) {
+	public IFuture<Boolean> buyThisAction(InvestidorAgentBDI agent, Acao acao) {
 		if(!checkIfDontHaveAction(acao.getNomeBolsa())) {
 			String text = "";
 			text += "O agente " +agent.getNome()+ " disse para comprar a acao "+ acao.getNomeBolsa() +", mas ja a tenho.\n";
 			frame.jTextArea1.append(text);
-			return false;
+			return new Future<Boolean>(false);
 		}		
 		
 		if(this.cash > acao.getValorDeCompra()) {
@@ -426,12 +439,12 @@ public class InvestidorAgentBDI implements IFollowService {
 			text += "Valor em conta: " + getCash() + "\n";
 			
 			frame.jTextArea1.append(text);
-			return true;
+			return new Future<Boolean>(true);
 		} else {
 			String text = "";
 			text += "Ia a acao "+acao.getNomeBolsa() + " que o " +agent.getNome()+ " comprou, mas não tenho dinheiro.\n";
 			frame.jTextArea1.append(text);
-			return false;
+			return new Future<Boolean>(false);
 		}
 	}
 

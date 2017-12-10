@@ -1,16 +1,10 @@
 package Agentes;
 import java.util.ArrayList;
 import java.util.List;
-
-import jadex.bdiv3.annotation.Belief;
 import jadex.bdiv3.BDIAgent;
 import jadex.bdiv3.annotation.Plan;
-import jadex.bdiv3.annotation.PlanBody;
-import jadex.bdiv3.annotation.Plans;
-import jadex.bdiv3.annotation.Trigger;
 import jadex.bdiv3.runtime.IPlan;
 import jadex.micro.annotation.AgentBody;
-import jadex.micro.annotation.Description;
 import jadex.micro.annotation.Agent;
 import jadex.micro.annotation.ProvidedServices;
 import jadex.micro.annotation.ProvidedService;
@@ -19,7 +13,6 @@ import jadex.commons.future.Future;
 import jadex.commons.future.IFuture;
 import java.util.concurrent.ThreadLocalRandom;
 
-import App.Acao;
 import App.Bolsa;
 import App.Cotacao;
 import Auxiliar.Auxiliar;
@@ -111,11 +104,8 @@ public class BolsaAgentBDI implements BolsaService {
 		this.ListaInvestidores.add(agente);
 	}*/
 
-
-
-	public List<Bolsa> getValoresBolsa() {
-		//System.out.println("Vou passar a bolsa para o investidor");
-		return this.ListaBolsa;
+	public IFuture<List<Bolsa>> getValoresBolsa() {
+		return new Future<List<Bolsa>>(this.ListaBolsa);
 	}
 
 	public void updateBolsa() {
