@@ -2,17 +2,13 @@ package Agentes;
 
 import Auxiliar.Setup;
 import jadex.base.Starter;
-import jadex.bridge.IComponentIdentifier;
 import jadex.bridge.IExternalAccess;
 import jadex.bridge.service.RequiredServiceInfo;
 import jadex.bridge.service.search.SServiceProvider;
-import jadex.bridge.service.types.cms.CreationInfo;
 import jadex.bridge.service.types.cms.IComponentManagementService;
 import jadex.commons.future.ThreadSuspendable;
 
 import javax.swing.*;
-import java.util.HashMap;
-import java.util.Map;
 
 public class BolsaAgent_MAIN {
 
@@ -29,20 +25,18 @@ public class BolsaAgent_MAIN {
 		final IExternalAccess platform = Starter.createPlatform(argsStarter).get(sus);
 		IComponentManagementService cms = SServiceProvider.getService(platform.getServiceProvider(),
 				IComponentManagementService.class, RequiredServiceInfo.SCOPE_PLATFORM).get(sus);
-		final Setup setup = new Setup(cms,sus,platform);
+		final Setup setup = new Setup(cms, sus, platform);
 
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				setup.setTitle("Setup");
 				setup.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-				//setup.jTextArea1.append("Ola, sou o Agente Bolsa \n");
 				setup.setSize(800, 800);
 				setup.pack();
 				setup.setVisible(true);
 			}
 		});
-
 
 
 	}

@@ -11,35 +11,39 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 public class Setup extends JFrame {
 
+	private LinkedList<AgentArgs> agents;
 	private ThreadSuspendable sus;
 	private IComponentManagementService cms;
 	private IExternalAccess platform;
-
-
 	private JButton okButton;
 	private JButton defaultButton;
 	private JButton adicionarButton;
-	private JTextField startingMoney;
-	private JTextField percentageToSell;
-	private JTextField nameField;
-	private JTextField percentageToBuy;
-	private JTextField historyLookback;
-	private JTextField numberOfActionsSell;
-	private JTextField textField1;
+	private JTextField valueToBuyAction;
+	private JTextField percentMinToSellAndLoose;
+	private JTextField nome;
+	private JTextField percentToSell;
+	private JTextField percentToBuy;
+	private JTextField percentMinToFollow;
+	private JTextField numberOfCotacoesToCheck;
 	private JTextField bolsaTick;
 	private JPanel mainForm;
 	private JPanel panel1;
 	private JPanel panel2;
 	private JPanel panel3;
+	private JTextField GoalActionsNumber;
+	private JTextField TimeToAskBolsa;
+	private JTextField initialCash;
 
 	public Setup(IComponentManagementService cms, ThreadSuspendable sus, final IExternalAccess platform) {
 		this.cms = cms;
 		this.sus = sus;
 		this.platform = platform;
+		agents = new LinkedList<AgentArgs>();
 		setLayout(new BorderLayout());
 		setSize(500, 500);
 		add(mainForm);
@@ -47,6 +51,10 @@ public class Setup extends JFrame {
 		//setLocationRelativeTo(null);
 
 		defaultButton.addActionListener(new DefaultButtonListener() {
+		});
+		okButton.addActionListener(new okButtonListener() {
+		});
+		adicionarButton.addActionListener(new addButtonListener() {
 		});
 	}
 
@@ -89,11 +97,11 @@ public class Setup extends JFrame {
 		randomArgs.put("timeToAskBolsa", 6950);
 		randomArgs.put("isRandomAgent", true);
 		randomArgs.put("goalActionsNumber", 10);
-		
+
 		//Agente Bolsa
 		Map<String, Object> bolsaArgs = new HashMap<String, Object>();
 		bolsaArgs.put("TIMEBOLSA", 2000);
-		
+
 		CreationInfo investidorArriscadoInfo = new CreationInfo(arriscadoArgs);
 		CreationInfo investidorCautelosoInfo = new CreationInfo(cautelosoArgs);
 		CreationInfo investidorRandomInfo = new CreationInfo(randomArgs);
@@ -105,11 +113,105 @@ public class Setup extends JFrame {
 		IComponentIdentifier agenteInvestidor3 = this.cms.createComponent("bin/Agentes/InvestidorAgentBDI.class", investidorRandomInfo).getFirstResult(this.sus);
 	}
 
+	public void setData(AgentArgs data) {
+		percentToBuy.setText(data.getPercentToBuy());
+		nome.setText(data.getName());
+		percentToSell.setText(data.getPercentToSell());
+		percentMinToSellAndLoose.setText(data.getPercentToLoose());
+		valueToBuyAction.setText(data.getValueToBuyAction());
+		percentMinToFollow.setText(data.getPercentToFollow());
+		numberOfCotacoesToCheck.setText(data.getNumberOfCheck());
+		GoalActionsNumber.setText(data.getGoalNumber());
+		TimeToAskBolsa.setText(data.getTimeBolsa());
+		initialCash.setText(data.getStartingMoney());
+	}
+
+	public void getData(AgentArgs data) {
+		data.setPercentToBuy(percentToBuy.getText());
+		data.setName(nome.getText());
+		data.setPercentToSell(percentToSell.getText());
+		data.setPercentToLoose(percentMinToSellAndLoose.getText());
+		data.setValueToBuyAction(valueToBuyAction.getText());
+		data.setPercentToFollow(percentMinToFollow.getText());
+		data.setNumberOfCheck(numberOfCotacoesToCheck.getText());
+		data.setGoalNumber(GoalActionsNumber.getText());
+		data.setTimeBolsa(TimeToAskBolsa.getText());
+		data.setStartingMoney(initialCash.getText());
+	}
+
+	public boolean isModified(AgentArgs data) {
+		if (percentToBuy.getText() != null ? !percentToBuy.getText().equals(data.getPercentToBuy()) : data.getPercentToBuy() != null)
+			return true;
+		if (nome.getText() != null ? !nome.getText().equals(data.getName()) : data.getName() != null) return true;
+		if (percentToSell.getText() != null ? !percentToSell.getText().equals(data.getPercentToSell()) : data.getPercentToSell() != null)
+			return true;
+		if (percentMinToSellAndLoose.getText() != null ? !percentMinToSellAndLoose.getText().equals(data.getPercentToLoose()) : data.getPercentToLoose() != null)
+			return true;
+		if (valueToBuyAction.getText() != null ? !valueToBuyAction.getText().equals(data.getValueToBuyAction()) : data.getValueToBuyAction() != null)
+			return true;
+		if (percentMinToFollow.getText() != null ? !percentMinToFollow.getText().equals(data.getPercentToFollow()) : data.getPercentToFollow() != null)
+			return true;
+		if (numberOfCotacoesToCheck.getText() != null ? !numberOfCotacoesToCheck.getText().equals(data.getNumberOfCheck()) : data.getNumberOfCheck() != null)
+			return true;
+		if (GoalActionsNumber.getText() != null ? !GoalActionsNumber.getText().equals(data.getGoalNumber()) : data.getGoalNumber() != null)
+			return true;
+		if (TimeToAskBolsa.getText() != null ? !TimeToAskBolsa.getText().equals(data.getTimeBolsa()) : data.getTimeBolsa() != null)
+			return true;
+		if (initialCash.getText() != null ? !initialCash.getText().equals(data.getStartingMoney()) : data.getStartingMoney() != null)
+			return true;
+		return false;
+	}
+
+	private void start(IComponentManagementService cms, ThreadSuspendable sus, IExternalAccess platform, String text, LinkedList<AgentArgs> agents) {
+
+		Map<String, Object> bolsaArgs = new HashMap<String, Object>();
+		bolsaArgs.put("TIMEBOLSA", Integer.parseInt(text));
+		CreationInfo bolsaInfo = new CreationInfo(bolsaArgs);
+		cms.createComponent("bin/Agentes/BolsaAgentBDI.class", bolsaInfo).getFirstResult(sus);
+
+		Map<String, Object> args;
+		for (AgentArgs agent : agents) {
+			args = new HashMap<String, Object>();
+			args.put("nome", agent.getName());
+			args.put("initialCash", Integer.parseInt(agent.getStartingMoney()));
+			args.put("valueToBuyAction", Integer.parseInt(agent.getValueToBuyAction()));
+			args.put("percentMinToFollow", Double.parseDouble(agent.getPercentToFollow()));
+			args.put("numberOfCotacoesToCheck", Integer.parseInt(agent.getNumberOfCheck()));
+			args.put("timeToAskBolsa", Integer.parseInt(agent.getTimeBolsa()));
+			args.put("isRandomAgent", false);
+			args.put("goalActionsNumber", Integer.parseInt(agent.getGoalNumber()));
+			CreationInfo agentInfo = new CreationInfo(args);
+			cms.createComponent("bin/Agentes/InvestidorAgentBDI.class", agentInfo).getFirstResult(sus);
+		}
+
+
+
+
+	}
+
 	public class DefaultButtonListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			defaultConfiguration(cms, sus, platform);
 			setVisible(false);
+		}
+	}
+
+	public class okButtonListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			start(cms, sus, platform, bolsaTick.getText(), agents);
+			setVisible(false);
+		}
+	}
+
+	public class addButtonListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			AgentArgs temp = new AgentArgs();
+			getData(temp);
+			agents.add(temp);
+			setData(new AgentArgs());
 		}
 	}
 
