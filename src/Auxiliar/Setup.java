@@ -323,8 +323,8 @@ public class Setup extends JFrame {
 			//if (isModified(temp)) {
 				agents.add(temp);
 				System.out.println("Adicionado Agente " + temp.getName());
-				System.out.println("nr de accoes = " + temp.getGoalNumber());
-			System.out.println("starting money = " + temp.getStartingMoney());
+				System.out.println("Objetivo de vendas de acoes = " + temp.getGoalNumber());
+				System.out.println("Banca inicial = " + temp.getStartingMoney());
 				setData(new AgentArgs());
 			//}
 		}
