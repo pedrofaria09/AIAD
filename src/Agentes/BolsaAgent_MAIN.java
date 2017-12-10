@@ -27,7 +27,7 @@ public class BolsaAgent_MAIN {
         arriscadoArgs.put("valueToBuyAction", 3000);
         arriscadoArgs.put("percentToBuy", 5);
         arriscadoArgs.put("percentToSell", 10);
-        arriscadoArgs.put("percentMinToSellAndLoose", 10);
+        arriscadoArgs.put("percentMinToSellAndLoose", 20);
         arriscadoArgs.put("percentMinToFollow", 0.5);
         arriscadoArgs.put("numberOfCotacoesToCheck", 3);
         arriscadoArgs.put("timeToAskBolsa", 7050);
@@ -40,12 +40,12 @@ public class BolsaAgent_MAIN {
         cautelosoArgs.put("valueToBuyAction", 2000);
         cautelosoArgs.put("percentToBuy", 7);
         cautelosoArgs.put("percentToSell", 5);
-        cautelosoArgs.put("percentMinToSellAndLoose", 5);
+        cautelosoArgs.put("percentMinToSellAndLoose", 10);
         cautelosoArgs.put("percentMinToFollow", 0.5);
         cautelosoArgs.put("numberOfCotacoesToCheck", 3);
         cautelosoArgs.put("timeToAskBolsa", 7000);
         cautelosoArgs.put("isRandomAgent", false);
-        cautelosoArgs.put("goalActionsNumber", 4);
+        cautelosoArgs.put("goalActionsNumber", 5);
         
 		//Agente Random
         Map<String, Object> randomArgs = new HashMap<String, Object>();
@@ -69,7 +69,7 @@ public class BolsaAgent_MAIN {
 		IComponentIdentifier agenteBolsa = cms.createComponent("bin/Agentes/BolsaAgentBDI.class", null).getFirstResult(sus);
 		IComponentIdentifier agenteInvestidor1 = cms.createComponent("bin/Agentes/InvestidorAgentBDI.class", investidorArriscadoInfo).getFirstResult(sus);
 		IComponentIdentifier agenteInvestidor2 = cms.createComponent("bin/Agentes/InvestidorAgentBDI.class", investidorCautelosoInfo).getFirstResult(sus);
-		IComponentIdentifier agenteInvestidor3 = cms.createComponent("bin/Agentes/InvestidorAgentBDI.class", investidorRandomInfo).getFirstResult(sus);
+		//IComponentIdentifier agenteInvestidor3 = cms.createComponent("bin/Agentes/InvestidorAgentBDI.class", investidorRandomInfo).getFirstResult(sus);
 
 
 	}

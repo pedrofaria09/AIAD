@@ -480,7 +480,7 @@ public class InvestidorAgentBDI implements IFollowService {
 			return new Future<Boolean>(true);
 		} else {
 			String text = "";
-			text += "Ia a acao "+acao.getNomeBolsa() + " que o " +agent.getNome()+ " comprou, mas n�o tenho dinheiro.\n";
+			text += "Ia a acao "+acao.getNomeBolsa() + " que o " +agent.getNome()+ " comprou, mas nao tenho dinheiro.\n";
 			frame.jTextArea1.append(text);
 			return new Future<Boolean>(false);
 		}

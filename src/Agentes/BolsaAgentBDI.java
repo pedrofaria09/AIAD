@@ -30,7 +30,6 @@ public class BolsaAgentBDI implements BolsaService {
 	private AgentLogFrame frame;
 
 	public BolsaAgentBDI() {
-		System.out.println("Criou o Agente Bolsa");
 		frame = new AgentLogFrame();
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
